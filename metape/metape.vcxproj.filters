@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\refldr">
+      <UniqueIdentifier>{ed5ac622-0f52-4829-9e94-eafff0a8b29c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\refldr">
+      <UniqueIdentifier>{891cc9ed-3143-47e9-b308-f96401cc7447}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\detours">
+      <UniqueIdentifier>{ba1125ba-cad4-4811-82db-20d48ec61d4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\wow64ext">
+      <UniqueIdentifier>{c64f836c-e174-43d6-a3c1-41012c1e2440}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\peasm">
+      <UniqueIdentifier>{b733b677-e7cc-4f94-abd9-64e9f148af2d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryModule.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ReflectiveDLLInjection.h">
+      <Filter>源文件\refldr</Filter>
+    </ClInclude>
+    <ClInclude Include="ReflectiveLoader.h">
+      <Filter>源文件\refldr</Filter>
+    </ClInclude>
+    <ClInclude Include="detours\detours.h">
+      <Filter>源文件\detours</Filter>
+    </ClInclude>
+    <ClInclude Include="detours\detver.h">
+      <Filter>源文件\detours</Filter>
+    </ClInclude>
+    <ClInclude Include="wow64ext\CMemPtr.h">
+      <Filter>源文件\wow64ext</Filter>
+    </ClInclude>
+    <ClInclude Include="wow64ext\internal.h">
+      <Filter>源文件\wow64ext</Filter>
+    </ClInclude>
+    <ClInclude Include="wow64ext\wow64ext.h">
+      <Filter>源文件\wow64ext</Filter>
+    </ClInclude>
+    <ClInclude Include="peasm\peasm.h">
+      <Filter>源文件\peasm</Filter>
+    </ClInclude>
+    <ClInclude Include="peasm\pesection.h">
+      <Filter>源文件\peasm</Filter>
+    </ClInclude>
+    <ClInclude Include="peasm\types.h">
+      <Filter>源文件\peasm</Filter>
+    </ClInclude>
+    <ClInclude Include="Tools.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="metape.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryModule.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ReflectiveDll.c">
+      <Filter>源文件\refldr</Filter>
+    </ClCompile>
+    <ClCompile Include="ReflectiveLoader.c">
+      <Filter>源文件\refldr</Filter>
+    </ClCompile>
+    <ClCompile Include="detours\creatwth.cpp">
+      <Filter>源文件\detours</Filter>
+    </ClCompile>
+    <ClCompile Include="detours\detours.cpp">
+      <Filter>源文件\detours</Filter>
+    </ClCompile>
+    <ClCompile Include="detours\disasm.cpp">
+      <Filter>源文件\detours</Filter>
+    </ClCompile>
+    <ClCompile Include="detours\image.cpp">
+      <Filter>源文件\detours</Filter>
+    </ClCompile>
+    <ClCompile Include="detours\modules.cpp">
+      <Filter>源文件\detours</Filter>
+    </ClCompile>
+    <ClCompile Include="wow64ext\wow64ext.cpp">
+      <Filter>源文件\wow64ext</Filter>
+    </ClCompile>
+    <ClCompile Include="peasm\pe_amd64.cpp">
+      <Filter>源文件\peasm</Filter>
+    </ClCompile>
+    <ClCompile Include="peasm\pe_i386.cpp">
+      <Filter>源文件\peasm</Filter>
+    </ClCompile>
+    <ClCompile Include="peasm\peasm.cpp">
+      <Filter>源文件\peasm</Filter>
+    </ClCompile>
+    <ClCompile Include="peasm\pesection.cpp">
+      <Filter>源文件\peasm</Filter>
+    </ClCompile>
+    <ClCompile Include="Tools.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
