@@ -63,15 +63,6 @@ std::vector<std::string> splitstr(std::string str, std::string s);
 std::vector<std::wstring> splitwstr(std::wstring str, std::wstring s);
 void GetIniSecMapW(const wchar_t* file, const wchar_t* sec, std::map<std::wstring, std::wstring>& mapSec, bool bLwr);
 
-typedef struct  {
-	USHORT Length;
-	USHORT MaximumLength;
-	PCHAR  Buffer;
-} ANSI_STRING, *PANSI_STRING;
-typedef struct  {
-	USHORT Length;
-	USHORT MaximumLength;
-	PWCHAR Buffer;
-} UNICODE_STRING, *PUNICODE_STRING;
+
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 #endif //__TOOLS_H____h_

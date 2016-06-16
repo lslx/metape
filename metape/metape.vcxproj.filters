@@ -25,8 +25,8 @@
     <Filter Include="源文件\wow64ext">
       <UniqueIdentifier>{c64f836c-e174-43d6-a3c1-41012c1e2440}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\peasm">
-      <UniqueIdentifier>{b733b677-e7cc-4f94-abd9-64e9f148af2d}</UniqueIdentifier>
+    <Filter Include="源文件\TitanEngine">
+      <UniqueIdentifier>{c3b01f29-5ab0-4cec-8cb9-7a6ed88f0fe2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -63,17 +63,101 @@
     <ClInclude Include="wow64ext\wow64ext.h">
       <Filter>源文件\wow64ext</Filter>
     </ClInclude>
-    <ClInclude Include="peasm\peasm.h">
-      <Filter>源文件\peasm</Filter>
-    </ClInclude>
-    <ClInclude Include="peasm\pesection.h">
-      <Filter>源文件\peasm</Filter>
-    </ClInclude>
-    <ClInclude Include="peasm\types.h">
-      <Filter>源文件\peasm</Filter>
-    </ClInclude>
     <ClInclude Include="Tools.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\aplib.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\definitions.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\distorm.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Breakpoints.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Debugger.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Engine.Context.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Engine.Extension.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Engine.GUI.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Engine.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Engine.Hash.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Engine.Hider.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Engine.Hook.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Engine.Importer.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Engine.Simplification.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Engine.Threading.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Garbage.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Handle.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Helper.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Injector.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Librarian.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Mapping.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.OEPFinder.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Realigner.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.Threader.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\Global.TLS.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\LzmaDec.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\LzmaTypes.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\ntdll.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\resource.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\scylla_wrapper.h">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine\targetver.h">
+      <Filter>源文件\TitanEngine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -110,20 +194,190 @@
     <ClCompile Include="wow64ext\wow64ext.cpp">
       <Filter>源文件\wow64ext</Filter>
     </ClCompile>
-    <ClCompile Include="peasm\pe_amd64.cpp">
-      <Filter>源文件\peasm</Filter>
-    </ClCompile>
-    <ClCompile Include="peasm\pe_i386.cpp">
-      <Filter>源文件\peasm</Filter>
-    </ClCompile>
-    <ClCompile Include="peasm\peasm.cpp">
-      <Filter>源文件\peasm</Filter>
-    </ClCompile>
-    <ClCompile Include="peasm\pesection.cpp">
-      <Filter>源文件\peasm</Filter>
-    </ClCompile>
     <ClCompile Include="Tools.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Breakpoints.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Debugger.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Engine.Context.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Engine.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Engine.Extension.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Engine.GUI.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Engine.Hash.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Engine.Hider.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Engine.Hook.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Engine.Importer.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Engine.Simplification.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Engine.Threading.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Garbage.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Handle.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Helper.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Injector.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Librarian.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Mapping.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.OEPFinder.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Realigner.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Threader.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\Global.TLS.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\LzmaDec.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Breakpoints.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Debugger.Context.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Debugger.Control.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Debugger.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Debugger.Data.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Debugger.DebugLoop.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Debugger.Helper.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Debugger.Memory.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Disassembler.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Dumper.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Engine.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Engine.Simplification.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Exporter.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Handler.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Hider.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Hooks.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Importer.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Injector.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Librarian.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.OEPFinder.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.PE.Convert.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.PE.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.PE.Data.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.PE.Fixer.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.PE.Overlay.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.PE.Section.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Process.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Realigner.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Relocator.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Resourcer.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Static.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Threader.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.TLS.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.Tracer.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine\TitanEngine.TranslateName.cpp">
+      <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TitanEngine\TitanEngine.def">
+      <Filter>源文件\TitanEngine</Filter>
+    </None>
   </ItemGroup>
 </Project>

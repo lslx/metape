@@ -49,11 +49,15 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>DETOURS_X86;DETOURS_32BIT;WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>.\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>.\TitanEngine</AdditionalLibraryDirectories>
+      <AdditionalDependencies>scylla_wrapperd_x86.lib;distorm_x86.lib;Imagehlp.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -63,13 +67,19 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DETOURS_X86;DETOURS_32BIT;WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>scylla_wrapper_x86.lib;distorm_x86.lib;Imagehlp.lib;psapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\TitanEngine</AdditionalLibraryDirectories>
+      <AdditionalOptions>/SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
+      <ModuleDefinitionFile>.\TitanEngine\TitanEngine.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -79,13 +89,41 @@
     <ClInclude Include="detours\detours.h" />
     <ClInclude Include="detours\detver.h" />
     <ClInclude Include="MemoryModule.h" />
-    <ClInclude Include="peasm\peasm.h" />
-    <ClInclude Include="peasm\pesection.h" />
-    <ClInclude Include="peasm\types.h" />
     <ClInclude Include="ReflectiveDLLInjection.h" />
     <ClInclude Include="ReflectiveLoader.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TitanEngine\aplib.h" />
+    <ClInclude Include="TitanEngine\definitions.h" />
+    <ClInclude Include="TitanEngine\distorm.h" />
+    <ClInclude Include="TitanEngine\Global.Breakpoints.h" />
+    <ClInclude Include="TitanEngine\Global.Debugger.h" />
+    <ClInclude Include="TitanEngine\Global.Engine.Context.h" />
+    <ClInclude Include="TitanEngine\Global.Engine.Extension.h" />
+    <ClInclude Include="TitanEngine\Global.Engine.GUI.h" />
+    <ClInclude Include="TitanEngine\Global.Engine.h" />
+    <ClInclude Include="TitanEngine\Global.Engine.Hash.h" />
+    <ClInclude Include="TitanEngine\Global.Engine.Hider.h" />
+    <ClInclude Include="TitanEngine\Global.Engine.Hook.h" />
+    <ClInclude Include="TitanEngine\Global.Engine.Importer.h" />
+    <ClInclude Include="TitanEngine\Global.Engine.Simplification.h" />
+    <ClInclude Include="TitanEngine\Global.Engine.Threading.h" />
+    <ClInclude Include="TitanEngine\Global.Garbage.h" />
+    <ClInclude Include="TitanEngine\Global.Handle.h" />
+    <ClInclude Include="TitanEngine\Global.Helper.h" />
+    <ClInclude Include="TitanEngine\Global.Injector.h" />
+    <ClInclude Include="TitanEngine\Global.Librarian.h" />
+    <ClInclude Include="TitanEngine\Global.Mapping.h" />
+    <ClInclude Include="TitanEngine\Global.OEPFinder.h" />
+    <ClInclude Include="TitanEngine\Global.Realigner.h" />
+    <ClInclude Include="TitanEngine\Global.Threader.h" />
+    <ClInclude Include="TitanEngine\Global.TLS.h" />
+    <ClInclude Include="TitanEngine\LzmaDec.h" />
+    <ClInclude Include="TitanEngine\LzmaTypes.h" />
+    <ClInclude Include="TitanEngine\ntdll.h" />
+    <ClInclude Include="TitanEngine\resource.h" />
+    <ClInclude Include="TitanEngine\scylla_wrapper.h" />
+    <ClInclude Include="TitanEngine\targetver.h" />
     <ClInclude Include="Tools.h" />
     <ClInclude Include="wow64ext\CMemPtr.h" />
     <ClInclude Include="wow64ext\internal.h" />
@@ -94,51 +132,111 @@
   <ItemGroup>
     <ClCompile Include="detours\creatwth.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="detours\detours.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="detours\disasm.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="detours\image.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="detours\modules.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="MemoryModule.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="metape.cpp" />
-    <ClCompile Include="peasm\peasm.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="peasm\pesection.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="peasm\pe_amd64.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="peasm\pe_i386.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="ReflectiveDll.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ReflectiveLoader.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TitanEngine\Global.Breakpoints.cpp" />
+    <ClCompile Include="TitanEngine\Global.Debugger.cpp" />
+    <ClCompile Include="TitanEngine\Global.Engine.Context.cpp" />
+    <ClCompile Include="TitanEngine\Global.Engine.cpp" />
+    <ClCompile Include="TitanEngine\Global.Engine.Extension.cpp" />
+    <ClCompile Include="TitanEngine\Global.Engine.GUI.cpp" />
+    <ClCompile Include="TitanEngine\Global.Engine.Hash.cpp" />
+    <ClCompile Include="TitanEngine\Global.Engine.Hider.cpp" />
+    <ClCompile Include="TitanEngine\Global.Engine.Hook.cpp" />
+    <ClCompile Include="TitanEngine\Global.Engine.Importer.cpp" />
+    <ClCompile Include="TitanEngine\Global.Engine.Simplification.cpp" />
+    <ClCompile Include="TitanEngine\Global.Engine.Threading.cpp" />
+    <ClCompile Include="TitanEngine\Global.Garbage.cpp" />
+    <ClCompile Include="TitanEngine\Global.Handle.cpp" />
+    <ClCompile Include="TitanEngine\Global.Helper.cpp" />
+    <ClCompile Include="TitanEngine\Global.Injector.cpp" />
+    <ClCompile Include="TitanEngine\Global.Librarian.cpp" />
+    <ClCompile Include="TitanEngine\Global.Mapping.cpp" />
+    <ClCompile Include="TitanEngine\Global.OEPFinder.cpp" />
+    <ClCompile Include="TitanEngine\Global.Realigner.cpp" />
+    <ClCompile Include="TitanEngine\Global.Threader.cpp" />
+    <ClCompile Include="TitanEngine\Global.TLS.cpp" />
+    <ClCompile Include="TitanEngine\LzmaDec.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Breakpoints.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Debugger.Context.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Debugger.Control.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Debugger.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Debugger.Data.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Debugger.DebugLoop.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Debugger.Helper.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Debugger.Memory.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Disassembler.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Dumper.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Engine.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Engine.Simplification.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Exporter.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Handler.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Hider.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Hooks.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Importer.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Injector.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Librarian.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.OEPFinder.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.PE.Convert.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.PE.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.PE.Data.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.PE.Fixer.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.PE.Overlay.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.PE.Section.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Process.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Realigner.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Relocator.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Resourcer.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Static.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Threader.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.TLS.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.Tracer.cpp" />
+    <ClCompile Include="TitanEngine\TitanEngine.TranslateName.cpp" />
     <ClCompile Include="Tools.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="wow64ext\wow64ext.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TitanEngine\TitanEngine.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
