@@ -11,3 +11,16 @@
 // TODO:  在此处引用程序需要的其他头文件
 #include "TitanEngine/Titan_stdafx.h"
 
+
+// my define:
+#ifdef _UNICODE
+#define _tmainCRTStartup    wmainCRTStartup
+#else  /* _UNICODE */
+#define _tmainCRTStartup    mainCRTStartup
+#endif  /* _UNICODE */
+extern "C" int	_tmainCRTStartup(void);
+
+extern "C" IMAGE_DOS_HEADER __ImageBase;
+
+
+

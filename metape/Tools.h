@@ -64,5 +64,9 @@ std::vector<std::wstring> splitwstr(std::wstring str, std::wstring s);
 void GetIniSecMapW(const wchar_t* file, const wchar_t* sec, std::map<std::wstring, std::wstring>& mapSec, bool bLwr);
 
 
-extern "C" IMAGE_DOS_HEADER __ImageBase;
+
+
+void* File2Buffer(long* pSize, const char* strPath);
+
+bool Buffer2File(const char* szPathFile, const void* buffer, const int nBufferSize);
 #endif //__TOOLS_H____h_

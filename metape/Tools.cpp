@@ -588,3 +588,37 @@ char instbyte[] =
 // #pragma comment (linker,"/merge:.data=.code")
 // #pragma code_seg(".code")
 
+void* File2Buffer(long* pSize, const char* strPath)
+{
+	HANDLE hFile = ::CreateFileA(strPath, GENERIC_READ, 0, NULL, OPEN_EXISTING, NULL, NULL);
+	if (hFile != INVALID_HANDLE_VALUE)
+	{
+		DWORD nFileSize = ::GetFileSize(hFile, NULL);
+		char* lpBuffer = (char *)LocalAlloc(LPTR, nFileSize);
+		DWORD nNumberOfBytesRead;
+		BOOL bRet = ::ReadFile(hFile, lpBuffer, nFileSize, &nNumberOfBytesRead, NULL);// use a loop ?
+		CloseHandle(hFile);
+		if (bRet && nFileSize == nNumberOfBytesRead){
+			*pSize = nFileSize;
+			return lpBuffer;
+		}
+	}
+	return 0;
+}
+
+bool Buffer2File(const char* szPathFile, const void* buffer, const int nBufferSize)
+{
+	HANDLE hFile = ::CreateFileA(szPathFile, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, NULL, NULL);
+	if (hFile != INVALID_HANDLE_VALUE)
+	{
+		DWORD nNumberOfBytesWritten;
+		BOOL bRet = ::WriteFile(hFile, buffer, nBufferSize, &nNumberOfBytesWritten, NULL);
+		CloseHandle(hFile);
+		DWORD nFileSize = ::GetFileSize(hFile, NULL);
+
+		if (bRet && nFileSize == nNumberOfBytesWritten){
+			return true;
+		}
+	}
+	return false;
+}

@@ -28,6 +28,12 @@
     <Filter Include="源文件\TitanEngine">
       <UniqueIdentifier>{c3b01f29-5ab0-4cec-8cb9-7a6ed88f0fe2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\crtdll">
+      <UniqueIdentifier>{f6d41984-de12-4c33-bef3-5a78dcf3bc58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\crtexe">
+      <UniqueIdentifier>{4c1c9307-cd6e-49d3-97ff-5c90daefa397}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -373,6 +379,18 @@
     </ClCompile>
     <ClCompile Include="TitanEngine\TitanEngine.TranslateName.cpp">
       <Filter>源文件\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="crtdll\crtdll.c">
+      <Filter>源文件\crtdll</Filter>
+    </ClCompile>
+    <ClCompile Include="crtexe\crt0.c">
+      <Filter>源文件\crtexe</Filter>
+    </ClCompile>
+    <ClCompile Include="crtdll\natstart.c">
+      <Filter>源文件\crtdll</Filter>
+    </ClCompile>
+    <ClCompile Include="crtdll\my_crt0dat.c">
+      <Filter>源文件\crtdll</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

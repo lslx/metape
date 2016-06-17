@@ -161,6 +161,10 @@ FARPROC MemoryDefaultGetProcAddress(HCUSTOMMODULE, LPCSTR, void *);
  */
 void MemoryDefaultFreeLibrary(HCUSTOMMODULE, void *);
 
+// add by fhc:
+PVOID MemryModuleGetBase(HMEMORYMODULE module);
+// add end
+
 #ifdef __cplusplus
 }
 #endif

@@ -206,7 +206,7 @@ FinalizeSection(PMEMORYMODULE module, PSECTIONFINALIZEDATA sectionData) {
              (sectionData->size % module->pageSize) == 0)
            ) {
             // Only allowed to decommit whole pages
-            module->free(sectionData->address, sectionData->size, MEM_DECOMMIT, module->userdata);
+            //- dont free ,fix by fhc -//module->free(sectionData->address, sectionData->size, MEM_DECOMMIT, module->userdata);
         }
         return TRUE;
     }
@@ -995,3 +995,33 @@ MemoryLoadStringEx(HMEMORYMODULE module, UINT id, LPTSTR buffer, int maxsize, WO
 #endif
     return size;
 }
+
+
+PVOID MemryModuleGetBase(HMEMORYMODULE module)
+{
+	if (module)
+		return ((PMEMORYMODULE)module)->codeBase;
+	return 0;
+}
+
+
+/*  my func bk
+static DWORD
+GetRealSectionSize(PVOID pMapedMemData, PIMAGE_SECTION_HEADER section) {
+PIMAGE_DOS_HEADER dos_header = (PIMAGE_DOS_HEADER)pMapedMemData;
+PIMAGE_NT_HEADERS nt_header = (PIMAGE_NT_HEADERS)&((const unsigned char *)(dos_header))[dos_header->e_lfanew];
+
+DWORD size = section->SizeOfRawData;
+if (size == 0) {
+if (section->Characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA) {
+size = nt_header->OptionalHeader.SizeOfInitializedData;
+}
+else if (section->Characteristics & IMAGE_SCN_CNT_UNINITIALIZED_DATA) {
+size = nt_header->OptionalHeader.SizeOfUninitializedData;
+}
+}
+return size;
+}
+
+
+*/
