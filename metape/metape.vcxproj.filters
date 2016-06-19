@@ -165,6 +165,9 @@
     <ClInclude Include="TitanEngine\targetver.h">
       <Filter>源文件\TitanEngine</Filter>
     </ClInclude>
+    <ClInclude Include="PeTool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -391,6 +394,9 @@
     </ClCompile>
     <ClCompile Include="crtdll\my_crt0dat.c">
       <Filter>源文件\crtdll</Filter>
+    </ClCompile>
+    <ClCompile Include="PeTool.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -59,6 +59,7 @@
       <AdditionalDependencies>scylla_wrapperd_x86.lib;distorm_x86.lib;Imagehlp.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib;</IgnoreSpecificDefaultLibraries>
       <EntryPointSymbol>origin_main</EntryPointSymbol>
+      <ModuleDefinitionFile>.\TitanEngine\TitanEngine.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -90,6 +91,7 @@
     <ClInclude Include="detours\detours.h" />
     <ClInclude Include="detours\detver.h" />
     <ClInclude Include="MemoryModule.h" />
+    <ClInclude Include="PeTool.h" />
     <ClInclude Include="ReflectiveDLLInjection.h" />
     <ClInclude Include="ReflectiveLoader.h" />
     <ClInclude Include="stdafx.h" />
@@ -176,6 +178,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="metape.cpp" />
+    <ClCompile Include="PeTool.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="ReflectiveDll.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>

@@ -5,16 +5,48 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "metape", "metape\metape.vcxproj", "{B5516A96-E114-42E5-95CE-DB2037FBE14C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scylla_wrapper", "scylla_wrapper\scylla_wrapper.vcxproj", "{F874B1B3-8EF7-4DF1-9889-57098E08A51C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Debug-Lib|Win32 = Debug-Lib|Win32
+		Debug-Lib|x64 = Debug-Lib|x64
 		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+		Release-Lib|Win32 = Release-Lib|Win32
+		Release-Lib|x64 = Release-Lib|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B5516A96-E114-42E5-95CE-DB2037FBE14C}.Debug|Win32.ActiveCfg = Debug|Win32
 		{B5516A96-E114-42E5-95CE-DB2037FBE14C}.Debug|Win32.Build.0 = Debug|Win32
+		{B5516A96-E114-42E5-95CE-DB2037FBE14C}.Debug|x64.ActiveCfg = Debug|Win32
+		{B5516A96-E114-42E5-95CE-DB2037FBE14C}.Debug-Lib|Win32.ActiveCfg = Debug|Win32
+		{B5516A96-E114-42E5-95CE-DB2037FBE14C}.Debug-Lib|Win32.Build.0 = Debug|Win32
+		{B5516A96-E114-42E5-95CE-DB2037FBE14C}.Debug-Lib|x64.ActiveCfg = Debug|Win32
 		{B5516A96-E114-42E5-95CE-DB2037FBE14C}.Release|Win32.ActiveCfg = Release|Win32
 		{B5516A96-E114-42E5-95CE-DB2037FBE14C}.Release|Win32.Build.0 = Release|Win32
+		{B5516A96-E114-42E5-95CE-DB2037FBE14C}.Release|x64.ActiveCfg = Release|Win32
+		{B5516A96-E114-42E5-95CE-DB2037FBE14C}.Release-Lib|Win32.ActiveCfg = Release|Win32
+		{B5516A96-E114-42E5-95CE-DB2037FBE14C}.Release-Lib|Win32.Build.0 = Release|Win32
+		{B5516A96-E114-42E5-95CE-DB2037FBE14C}.Release-Lib|x64.ActiveCfg = Release|Win32
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Debug|Win32.Build.0 = Debug|Win32
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Debug|x64.ActiveCfg = Debug|x64
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Debug|x64.Build.0 = Debug|x64
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Debug-Lib|Win32.ActiveCfg = Debug-Lib|Win32
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Debug-Lib|Win32.Build.0 = Debug-Lib|Win32
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Debug-Lib|x64.ActiveCfg = Debug-Lib|x64
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Debug-Lib|x64.Build.0 = Debug-Lib|x64
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Release|Win32.ActiveCfg = Release|Win32
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Release|Win32.Build.0 = Release|Win32
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Release|x64.ActiveCfg = Release|x64
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Release|x64.Build.0 = Release|x64
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Release-Lib|Win32.ActiveCfg = Release-Lib|Win32
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Release-Lib|Win32.Build.0 = Release-Lib|Win32
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Release-Lib|x64.ActiveCfg = Release-Lib|x64
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Release-Lib|x64.Build.0 = Release-Lib|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

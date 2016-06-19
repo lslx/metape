@@ -6,26 +6,32 @@
 #include "Global.Engine.Extension.h"
 #include "Global.Engine.Threading.h"
 
+void TitanEngineInit(HINSTANCE hinstDLL){
+	engineHandle = hinstDLL;
+	EngineInit();
+	EmptyGarbage();
+	for (int i = 0; i < UE_MAX_RESERVED_MEMORY_LEFT; i++)
+		engineReservedMemoryLeft[i] = NULL;
+}
+void TitanEngineInit(bool bReleaseCallBack){
+	if (bReleaseCallBack)
+		ExtensionManagerPluginReleaseCallBack();
+	RemoveDirectoryW(engineSzEngineGarbageFolder);
+	CriticalSectionLocker::Deinitialize(); //delete critical sections
+}
 // Global.Engine.Entry:
-BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+BOOL APIENTRY DllMain_TitanEngine(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
     switch(fdwReason)
     {
     case DLL_PROCESS_ATTACH:
-        engineHandle = hinstDLL;
-        EngineInit();
-        EmptyGarbage();
-        for(int i = 0; i < UE_MAX_RESERVED_MEMORY_LEFT; i++)
-            engineReservedMemoryLeft[i] = NULL;
+		TitanEngineInit(hinstDLL);
         break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
         break; //this bug has been here since 2010
     case DLL_PROCESS_DETACH:
-        if(lpvReserved)
-            ExtensionManagerPluginReleaseCallBack();
-        RemoveDirectoryW(engineSzEngineGarbageFolder);
-        CriticalSectionLocker::Deinitialize(); //delete critical sections
+		TitanEngineInit((bool)lpvReserved);
         break;
     }
     return TRUE;

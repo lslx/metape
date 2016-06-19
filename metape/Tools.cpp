@@ -588,13 +588,14 @@ char instbyte[] =
 // #pragma comment (linker,"/merge:.data=.code")
 // #pragma code_seg(".code")
 
-void* File2Buffer(long* pSize, const char* strPath)
+void* File2BufferW(DWORD* pSize, const wchar_t* szPathFileW)
 {
-	HANDLE hFile = ::CreateFileA(strPath, GENERIC_READ, 0, NULL, OPEN_EXISTING, NULL, NULL);
+	char* lpBuffer = NULL;
+	HANDLE hFile = ::CreateFileW(szPathFileW, GENERIC_READ, 0, NULL, OPEN_EXISTING, NULL, NULL);
 	if (hFile != INVALID_HANDLE_VALUE)
 	{
 		DWORD nFileSize = ::GetFileSize(hFile, NULL);
-		char* lpBuffer = (char *)LocalAlloc(LPTR, nFileSize);
+		lpBuffer = (char *)LocalAlloc(LPTR, nFileSize);
 		DWORD nNumberOfBytesRead;
 		BOOL bRet = ::ReadFile(hFile, lpBuffer, nFileSize, &nNumberOfBytesRead, NULL);// use a loop ?
 		CloseHandle(hFile);
@@ -603,7 +604,16 @@ void* File2Buffer(long* pSize, const char* strPath)
 			return lpBuffer;
 		}
 	}
-	return 0;
+	if (lpBuffer)
+		LocalFree(lpBuffer);
+	return NULL;
+}
+void* File2Buffer(DWORD* pSize, const char* szPathFile)
+{
+	WCHAR szPathFileW[MAX_PATH] = { 0 };
+	MultiByteToWideChar(CP_ACP, NULL, szPathFile, -1, szPathFileW, _countof(szPathFileW));
+	return File2BufferW(pSize, szPathFileW);
+
 }
 
 bool Buffer2File(const char* szPathFile, const void* buffer, const int nBufferSize)
@@ -619,6 +629,196 @@ bool Buffer2File(const char* szPathFile, const void* buffer, const int nBufferSi
 		if (bRet && nFileSize == nNumberOfBytesWritten){
 			return true;
 		}
+	}
+	return false;
+}
+
+static void ChgeHeaderSectionAddr(PVOID pMapedMemData, DWORD TagartBase)
+{
+	PIMAGE_DOS_HEADER dos_header = (PIMAGE_DOS_HEADER)pMapedMemData;
+	PIMAGE_NT_HEADERS nt_header = (PIMAGE_NT_HEADERS)&((const unsigned char *)(dos_header))[dos_header->e_lfanew];
+	//chge the image base
+	nt_header->OptionalHeader.ImageBase = TagartBase;
+
+	PIMAGE_SECTION_HEADER section = IMAGE_FIRST_SECTION(nt_header);
+	for (int i = 0; i < nt_header->FileHeader.NumberOfSections; i++, section++) {
+		unsigned char* dest = (unsigned char*)TagartBase + section->VirtualAddress;
+		//chge the section addr
+		section->Misc.PhysicalAddress = (DWORD)(uintptr_t)dest;
+	}
+}
+
+BOOL MapedPePerformBaseRelocation(PVOID pMapedMemData, DWORD TagartBase)
+{
+	PIMAGE_DOS_HEADER dos_header = (PIMAGE_DOS_HEADER)pMapedMemData;
+	PIMAGE_NT_HEADERS nt_header = (PIMAGE_NT_HEADERS)&((const unsigned char *)(dos_header))[dos_header->e_lfanew];
+	ptrdiff_t delta = (DWORD)TagartBase - (DWORD)nt_header->OptionalHeader.ImageBase;
+
+	unsigned char *codeBase = (unsigned char*)pMapedMemData;
+	PIMAGE_BASE_RELOCATION relocation;
+	PIMAGE_DATA_DIRECTORY directory = (PIMAGE_DATA_DIRECTORY)&(nt_header)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC];
+	if (directory->Size == 0) {
+		return (delta == 0);
+	}
+	//if  directory->Size is not zero, but the delta is zero,  the program will do the right thing
+
+	// fix the header
+	ChgeHeaderSectionAddr(pMapedMemData, TagartBase);
+
+	relocation = (PIMAGE_BASE_RELOCATION)(codeBase + directory->VirtualAddress);
+	for (; relocation->VirtualAddress > 0;) {
+		DWORD i;
+		unsigned char *dest = codeBase + relocation->VirtualAddress;
+		unsigned short *relInfo = (unsigned short *)((unsigned char *)relocation + sizeof(IMAGE_BASE_RELOCATION));
+		for (i = 0; i < ((relocation->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / 2); i++, relInfo++) {
+			DWORD *patchAddrHL;
+#ifdef _WIN64
+			ULONGLONG *patchAddr64;
+#endif
+			int type, offset;
+
+			// the upper 4 bits define the type of relocation
+			type = *relInfo >> 12;
+			// the lower 12 bits define the offset
+			offset = *relInfo & 0xfff;
+
+			switch (type)
+			{
+			case IMAGE_REL_BASED_ABSOLUTE:
+				// skip relocation
+				break;
+
+			case IMAGE_REL_BASED_HIGHLOW:
+				// change complete 32 bit address
+				patchAddrHL = (DWORD *)(dest + offset);
+				*patchAddrHL += (DWORD)delta;
+				break;
+
+#ifdef _WIN64
+			case IMAGE_REL_BASED_DIR64:
+				patchAddr64 = (ULONGLONG *)(dest + offset);
+				*patchAddr64 += (ULONGLONG)delta;
+				break;
+#endif
+
+			default:
+				//printf("Unknown relocation: %d\n", type);
+				break;
+			}
+		}
+
+		// advance to next relocation block
+		relocation = (PIMAGE_BASE_RELOCATION)(((char *)relocation) + relocation->SizeOfBlock);
+	}
+	return TRUE;
+}
+
+SIZE_T GetMemImageSize(void* ImageBase)
+{
+	PIMAGE_DOS_HEADER dos_header = (PIMAGE_DOS_HEADER)ImageBase;
+	PIMAGE_NT_HEADERS nt_header = (PIMAGE_NT_HEADERS)&((const unsigned char *)(dos_header))[dos_header->e_lfanew];
+	SIZE_T imageSize = nt_header->OptionalHeader.SizeOfImage;
+	return imageSize;
+}
+PVOID MapedMemPeGetProcAddress(PVOID pMapedMemData, LPCSTR name)
+{
+	PIMAGE_DOS_HEADER dos_header = (PIMAGE_DOS_HEADER)pMapedMemData;
+	PIMAGE_NT_HEADERS nt_header = (PIMAGE_NT_HEADERS)&((const unsigned char *)(dos_header))[dos_header->e_lfanew];
+	unsigned char *codeBase = (unsigned char *)pMapedMemData;
+	DWORD idx = 0;
+	PIMAGE_EXPORT_DIRECTORY exports;
+	PIMAGE_DATA_DIRECTORY directory = (PIMAGE_DATA_DIRECTORY)&(nt_header)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+
+	if (directory->Size == 0) {
+		// no export table found
+		SetLastError(ERROR_PROC_NOT_FOUND);
+		return NULL;
+	}
+
+	exports = (PIMAGE_EXPORT_DIRECTORY)(codeBase + directory->VirtualAddress);
+	if (exports->NumberOfNames == 0 || exports->NumberOfFunctions == 0) {
+		// DLL doesn't export anything
+		SetLastError(ERROR_PROC_NOT_FOUND);
+		return NULL;
+	}
+
+	if (HIWORD(name) == 0) {
+		// load function by ordinal value
+		if (LOWORD(name) < exports->Base) {
+			SetLastError(ERROR_PROC_NOT_FOUND);
+			return NULL;
+		}
+
+		idx = LOWORD(name) - exports->Base;
+	}
+	else {
+		// search function name in list of exported names
+		DWORD i;
+		DWORD *nameRef = (DWORD *)(codeBase + exports->AddressOfNames);
+		WORD *ordinal = (WORD *)(codeBase + exports->AddressOfNameOrdinals);
+		BOOL found = FALSE;
+		for (i = 0; i < exports->NumberOfNames; i++, nameRef++, ordinal++) {
+			if (_stricmp(name, (const char *)(codeBase + (*nameRef))) == 0) {
+				idx = *ordinal;
+				found = TRUE;
+				break;
+			}
+		}
+
+		if (!found) {
+			// exported symbol not found
+			SetLastError(ERROR_PROC_NOT_FOUND);
+			return NULL;
+		}
+	}
+
+	if (idx > exports->NumberOfFunctions) {
+		// name <-> ordinal number don't match
+		SetLastError(ERROR_PROC_NOT_FOUND);
+		return NULL;
+	}
+	// AddressOfFunctions contains the RVAs to the "real" functions
+	return (LPVOID)(nt_header->OptionalHeader.ImageBase + (*(DWORD *)(codeBase + exports->AddressOfFunctions + (idx * 4))));
+}
+PVOID MapedMemPeGetEntryPoint(PVOID pMapedMemData)
+{
+	PIMAGE_DOS_HEADER dos_header = (PIMAGE_DOS_HEADER)pMapedMemData;
+	PIMAGE_NT_HEADERS nt_header = (PIMAGE_NT_HEADERS)&((const unsigned char *)(dos_header))[dos_header->e_lfanew];
+	return (char*)nt_header->OptionalHeader.ImageBase + nt_header->OptionalHeader.AddressOfEntryPoint;
+}
+bool ChgeMapedExe2Dll(PVOID pMapedMemData)
+{
+	PIMAGE_DOS_HEADER dos_header = (PIMAGE_DOS_HEADER)pMapedMemData;
+	PIMAGE_NT_HEADERS nt_header = (PIMAGE_NT_HEADERS)&((const unsigned char *)(dos_header))[dos_header->e_lfanew];
+
+	bool bIsDLL = (nt_header->FileHeader.Characteristics & IMAGE_FILE_DLL) != 0;
+	if (bIsDLL)
+		return false;
+	//chge the bit 
+	nt_header->FileHeader.Characteristics |= IMAGE_FILE_DLL;
+	//set the dll main entry
+	PVOID dllEntry = MapedMemPeGetProcAddress(pMapedMemData, "origin_dll_main");
+	if (dllEntry){
+		nt_header->OptionalHeader.AddressOfEntryPoint = (DWORD)(char*)dllEntry - nt_header->OptionalHeader.ImageBase;
+		return true;
+	}
+	return false;
+}
+bool ChgeMapedDll2Exe(PVOID pMapedMemData)
+{
+	PIMAGE_DOS_HEADER dos_header = (PIMAGE_DOS_HEADER)pMapedMemData;
+	PIMAGE_NT_HEADERS nt_header = (PIMAGE_NT_HEADERS)&((const unsigned char *)(dos_header))[dos_header->e_lfanew];
+
+	bool bIsDLL = (nt_header->FileHeader.Characteristics & IMAGE_FILE_DLL) != 0;
+	if (!bIsDLL)
+		return false;
+	//chge the bit 
+	nt_header->FileHeader.Characteristics &= ~IMAGE_FILE_DLL;
+	//set the exe main entry
+	PVOID dllEntry = MapedMemPeGetProcAddress(pMapedMemData, "origin_main");
+	if (dllEntry){
+		nt_header->OptionalHeader.AddressOfEntryPoint = (DWORD)(char*)dllEntry - nt_header->OptionalHeader.ImageBase;
+		return true;
 	}
 	return false;
 }

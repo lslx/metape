@@ -66,7 +66,15 @@ void GetIniSecMapW(const wchar_t* file, const wchar_t* sec, std::map<std::wstrin
 
 
 
-void* File2Buffer(long* pSize, const char* strPath);
-
+void* File2BufferW(DWORD* pSize, const wchar_t* szPathFileW);
+void* File2Buffer(DWORD* pSize, const char* szPathFile);
 bool Buffer2File(const char* szPathFile, const void* buffer, const int nBufferSize);
+
+static void ChgeHeaderSectionAddr(PVOID pMapedMemData, DWORD TagartBase);
+BOOL MapedPePerformBaseRelocation(PVOID pMapedMemData, DWORD TagartBase);
+SIZE_T GetMemImageSize(void* ImageBase);
+PVOID MapedMemPeGetProcAddress(PVOID pMapedMemData, LPCSTR name);
+PVOID MapedMemPeGetEntryPoint(PVOID pMapedMemData);
+bool ChgeMapedExe2Dll(PVOID pMapedMemData);
+bool ChgeMapedDll2Exe(PVOID pMapedMemData);
 #endif //__TOOLS_H____h_

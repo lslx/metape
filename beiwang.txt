@@ -1,0 +1,13 @@
+
+
+由def文件可能产生的bug
+
+当工程exe时
+def文件中的 LIBRARY "TitanEngine" 指令代表生成TitanEngine.dll
+vs2013 可能产生不可运行的exe文件
+详细原因： exe入口点没有参数， dll入口点有3个参数，
+生成了xxx.exe 但文件格式是dll，不能运行。
+是否产生如上bug取决于代码编译连接文件的顺序。
+如果不是如上bug，则有可能导致如下bug
+某个导出函数使用各种表示方法，都无法产生正确的无修饰的导出函数名，且最多
+只是产生修饰的c的导出函数名， 如 _origin_dll_main@12
