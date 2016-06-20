@@ -15,6 +15,7 @@ void* pCopyMemImage = 0;
 SIZE_T CopyMemImageSize = 0;
 int _tmain(int argc, _TCHAR* argv[])
 {
+	MessageBoxA(0, "ssssssssss", "", MB_OK);
 	PeTool pe;
 	pe.Test();
 
@@ -55,17 +56,40 @@ void* MoveMemImageToNew(void* ImageBase)
 {
 	SIZE_T imageSize = GetMemImageSize(ImageBase);
 	LPVOID pTmp = VirtualAllocEx(
-		GetCurrentProcess(), NULL, imageSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+		GetCurrentProcess(), NULL, imageSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
 	if (pTmp)
 		memcpy(pTmp, (void*)&__ImageBase, imageSize);
 	return pTmp;
 }
+typedef struct _RunInfo{
+	int iMoveCount;
+}RunInfo, *PRunInfo;
+
+typedef void(*PF_FakeCall_P0)();
+typedef void(*PF_FakeCall_P1)(DWORD);
+
 extern "C" {
 	__declspec(dllexport) int origin_main(void)
 	{
-		pCopyMemImage = MoveMemImageToNew(&__ImageBase);
-		CopyMemImageSize = GetMemImageSize(&__ImageBase);
-		return _tmainCRTStartup();
+		char JmpCode[64] = { /*push dword*/0x68, 0x00, 0x00, 0x00, 0x00, /*jmp eax*/0xFF, 0XE0 };
+		PVOID pRunInfo = NULL; 
+		char *pRetOnStack = (char*)_AddressOfReturnAddress();
+		char * pTmp = pRetOnStack - 1024 * 4;
+		if (0x0001 == pTmp[0] && 0x0021 == pTmp[1] && 0x0321 == pTmp[3] && 0x4321 == pTmp[4]){
+			pRunInfo = (PRunInfo)pTmp[2];
+			return _tmainCRTStartup();
+		}
+		else{
+			pRunInfo = LocalAlloc(LPTR, sizeof(RunInfo));
+			pCopyMemImage = MoveMemImageToNew(&__ImageBase);
+			if (pCopyMemImage && MapedPePerformBaseRelocation(pCopyMemImage, (DWORD)pCopyMemImage)){
+				void* pCopyEntry = MapedMemPeGetEntryPoint(pCopyMemImage);
+				memcpy(&JmpCode[1], pRetOnStack, 4);
+				*((unsigned int*)pRetOnStack) = (unsigned int)(JmpCode);
+				return (int)pCopyEntry;
+			}
+			return 0;
+		}
 	}
 }
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpReserved)
