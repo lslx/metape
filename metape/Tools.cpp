@@ -616,21 +616,26 @@ void* File2Buffer(DWORD* pSize, const char* szPathFile)
 
 }
 
-bool Buffer2File(const char* szPathFile, const void* buffer, const int nBufferSize)
+bool Buffer2FileW(const wchar_t* szPathFileW, const void* buffer, const int nBufferSize)
 {
-	HANDLE hFile = ::CreateFileA(szPathFile, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, NULL, NULL);
+	HANDLE hFile = ::CreateFileW(szPathFileW, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, NULL, NULL);
 	if (hFile != INVALID_HANDLE_VALUE)
 	{
 		DWORD nNumberOfBytesWritten;
 		BOOL bRet = ::WriteFile(hFile, buffer, nBufferSize, &nNumberOfBytesWritten, NULL);
-		CloseHandle(hFile);
 		DWORD nFileSize = ::GetFileSize(hFile, NULL);
-
+		CloseHandle(hFile);
 		if (bRet && nFileSize == nNumberOfBytesWritten){
 			return true;
 		}
 	}
 	return false;
+}
+bool Buffer2File(const char* szPathFile, const void* buffer, const int nBufferSize)
+{
+	WCHAR szPathFileW[MAX_PATH] = { 0 };
+	MultiByteToWideChar(CP_ACP, NULL, szPathFile, -1, szPathFileW, _countof(szPathFileW));
+	return Buffer2FileW(szPathFileW, buffer, nBufferSize);
 }
 
 static void ChgeHeaderSectionAddr(PVOID pMapedMemData, DWORD TagartBase)

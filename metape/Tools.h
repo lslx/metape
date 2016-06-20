@@ -68,6 +68,7 @@ void GetIniSecMapW(const wchar_t* file, const wchar_t* sec, std::map<std::wstrin
 
 void* File2BufferW(DWORD* pSize, const wchar_t* szPathFileW);
 void* File2Buffer(DWORD* pSize, const char* szPathFile);
+bool Buffer2FileW(const wchar_t* szPathFileW, const void* buffer, const int nBufferSize);
 bool Buffer2File(const char* szPathFile, const void* buffer, const int nBufferSize);
 
 static void ChgeHeaderSectionAddr(PVOID pMapedMemData, DWORD TagartBase);

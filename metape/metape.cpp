@@ -15,9 +15,10 @@ void* pCopyMemImage = 0;
 SIZE_T CopyMemImageSize = 0;
 int _tmain(int argc, _TCHAR* argv[])
 {
-	MessageBoxA(0, "ssssssssss", "", MB_OK);
 	PeTool pe;
 	pe.Test();
+	MessageBoxA(0, "ssssssssss", "", MB_OK);
+	return 0;
 
 	void TitanEngineInit(HINSTANCE hinstDLL);
 	TitanEngineInit((HINSTANCE)&__ImageBase);
@@ -65,16 +66,15 @@ typedef struct _RunInfo{
 	int iMoveCount;
 }RunInfo, *PRunInfo;
 
-typedef void(*PF_FakeCall_P0)();
-typedef void(*PF_FakeCall_P1)(DWORD);
 
 extern "C" {
 	__declspec(dllexport) int origin_main(void)
 	{
-		char JmpCode[64] = { /*push dword*/0x68, 0x00, 0x00, 0x00, 0x00, /*jmp eax*/0xFF, 0XE0 };
+		return _tmainCRTStartup();
+
 		PVOID pRunInfo = NULL; 
 		char *pRetOnStack = (char*)_AddressOfReturnAddress();
-		char * pTmp = pRetOnStack - 1024 * 4;
+		DWORD * pTmp = (DWORD*)(pRetOnStack - 1024 * 4);
 		if (0x0001 == pTmp[0] && 0x0021 == pTmp[1] && 0x0321 == pTmp[3] && 0x4321 == pTmp[4]){
 			pRunInfo = (PRunInfo)pTmp[2];
 			return _tmainCRTStartup();
@@ -83,9 +83,11 @@ extern "C" {
 			pRunInfo = LocalAlloc(LPTR, sizeof(RunInfo));
 			pCopyMemImage = MoveMemImageToNew(&__ImageBase);
 			if (pCopyMemImage && MapedPePerformBaseRelocation(pCopyMemImage, (DWORD)pCopyMemImage)){
+				char JmpCode[64] = { /*push dword*/0x68, 0x00, 0x00, 0x00, 0x00, /*jmp eax*/0xFF, 0XE0 };
 				void* pCopyEntry = MapedMemPeGetEntryPoint(pCopyMemImage);
 				memcpy(&JmpCode[1], pRetOnStack, 4);
 				*((unsigned int*)pRetOnStack) = (unsigned int)(JmpCode);
+				pTmp[0] = 0x0001; pTmp[1] = 0x0021; pTmp[2] = (DWORD)pRunInfo; pTmp[3] = 0x0321; pTmp[4] = 0x4321;
 				return (int)pCopyEntry;
 			}
 			return 0;

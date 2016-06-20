@@ -10,6 +10,9 @@ public:
 	IMAGE_SECTION_HEADER sectionHeader;
 	BYTE * data;
 	DWORD dataSize;
+	BYTE* pAlignGap;
+	DWORD dwAlignGapLen;
+
 	DWORD normalSize;
 
 	PeFileSection()
@@ -17,6 +20,9 @@ public:
 		ZeroMemory(&sectionHeader, sizeof(IMAGE_SECTION_HEADER));
 		data = 0;
 		dataSize = 0;
+		pAlignGap = 0;
+		dwAlignGapLen = 0;
+
 		normalSize = 0;
 	}
 };
@@ -47,11 +53,11 @@ public:
 	bool InitFromPeFileW(wchar_t* szPathFile);
 	bool InitFromPeFile(char* szPathFile);
 	bool InitFromNotMapedPeBuffer(void *pData, DWORD nSize);
- 	bool InitFromPeBuffer(void *pData, DWORD nSize);
 
 	void* SaveToPeBuffer(DWORD *nSize);
 	bool SaveToPeFileW(wchar_t* szPathFileW);
 	bool SaveToPeFile(char* szPathFile);
+	DWORD CalcSizeByPeContent();
 
 	bool IsPe32(){ return _pNTHeader32 != 0; }
 	bool IsPe64(){ return _pNTHeader64 != 0; }
