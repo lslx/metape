@@ -15,6 +15,9 @@ void* pCopyMemImage = 0;
 SIZE_T CopyMemImageSize = 0;
 int _tmain(int argc, _TCHAR* argv[])
 {
+	LogA("what:%d,%s", 25, "fk a");
+	LogW(L"what:%d,%s", 25, L"fk w");
+
 	PeTool pe;
 	pe.Test();
 	MessageBoxA(0, "ssssssssss", "", MB_OK);
@@ -70,6 +73,8 @@ typedef struct _RunInfo{
 extern "C" {
 	__declspec(dllexport) int origin_main(void)
 	{
+		LogA("what:%d,%s", 25, "fk a");
+
 		return _tmainCRTStartup();
 
 		PVOID pRunInfo = NULL; 

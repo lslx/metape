@@ -1,5 +1,6 @@
 #include "Tools.h"
 #include <windows.h>
+#include <strsafe.h>
 #include <Shlwapi.h>
 #include <regex>
 
@@ -24,17 +25,6 @@
 		strcat_s(buf, 1024, str);
 		strcat_s(buf, 1024, "\r\n");
 		fwrite(buf, 1, sizeof(buf), pFile);
-
-		//std::string temp;
-		//temp.assign(at);
-		////temp.assign(buf);
-		//temp.append(str);
-		//temp.append("\r\n");
-		//if (!temp.empty())
-		//{
-		//	fwrite(temp.c_str(), 1, temp.size(), pFile);
-		//}
-
 		fclose(pFile);
 	}
 #endif
@@ -54,23 +44,49 @@ void log(std::string str, char* at)
 		ofs.close();
 	}
 
-void OutputA(const char * strOutputString, ...)
+__declspec(selectany) DWORD _dw_log_mask = LOG_MASK_DEBUG_VIEW;
+void SetDebugOutMask(unsigned int dwMask)
 {
-	char strBuffer[4096] = { 0 };
-	va_list vlArgs;
-	va_start(vlArgs, strOutputString);
-	_vsnprintf_s(strBuffer, sizeof(strBuffer)-1, strOutputString, vlArgs);
-	va_end(vlArgs);
-	OutputDebugStringA(strBuffer);
+	_dw_log_mask = dwMask;
 }
-void OutputW(const wchar_t * strOutputString, ...)
+
+void LogA(const char * szFormat, ...)
 {
-	wchar_t strBuffer[4096] = { 0 };
-	va_list vlArgs;
-	va_start(vlArgs, strOutputString);
-	_vsnwprintf_s(strBuffer, sizeof(strBuffer)-1, strOutputString, vlArgs);
-	va_end(vlArgs);
-	OutputDebugStringW(strBuffer);
+	//_vsnprintf_s_InNtDll
+	char szOutStr[4096] = { 0 };
+	va_list va;
+	va_start(va, szFormat);
+	StringCbVPrintfA(szOutStr, sizeof(szOutStr), szFormat, va);
+	va_end(va);
+	/*
+	if (_dw_log_mask & LOG_MASK_DEBUG_VIEW)
+		OutputDebugStringW(szWriteBuf);
+	if (_dw_log_mask & LOG_MASK_LOG_FILE){
+#ifndef _DEBUGOUT_ONLY
+		char szWriteBufA[MAX_DEBUGSTR_LEN] = { 0 };
+		WideCharToMultiByte(CP_ACP, 0, szWriteBuf, (int)wcslen(szWriteBuf), szWriteBufA, sizeof(szWriteBufA), NULL, NULL);
+
+		if (_b_use_delay_write)
+			DelayWriteDebugOutInfo(szWriteBufA);
+		else
+			WriteDebugOutInfo(szWriteBufA);
+#endif
+
+	}
+	if (_dw_log_mask & LOG_MASK_CONSOLE)
+		wprintf(szWriteBuf);
+		*/
+
+}
+void LogW(const wchar_t * szFormat, ...)
+{
+	wchar_t szOutStr[4096] = { 0 };
+	va_list va;
+	va_start(va, szFormat);
+	//StringCbVPrintfW(szOutStr, sizeof(szOutStr), szFormat, va);
+	_vsnwprintf_s(szOutStr, sizeof(szOutStr)-1, szFormat, va);
+	va_end(va);
+	OutputDebugStringW(szOutStr);
 }
 
 bool IsLoadByShellcode()

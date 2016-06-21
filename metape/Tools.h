@@ -22,8 +22,12 @@ void log(std::string  str , char* at =NULL);
 #define log 
 #endif
 
-void OutputA(const char * strOutputString, ...);
-void OutputW(const wchar_t * strOutputString, ...);
+#define LOG_MASK_LOG_FILE		0x00000001L
+#define LOG_MASK_DEBUG_VIEW		0x00000002L
+#define LOG_MASK_CONSOLE		0x00000004L
+
+void LogA(const char * szFormats, ...);
+void LogW(const wchar_t * szFormats, ...);
 
 bool IsLoadByShellcode();
 void ByteAlign(std::string& strOutShellCode);
