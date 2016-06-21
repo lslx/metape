@@ -1,21 +1,49 @@
 #include "PeTool.h"
 #include "Tools.h"
 #include <algorithm>
-bool SortByPointerToRawData(const PeFileSection& d1, const PeFileSection& d2)
-{
+bool SortByPointerToRawData(const PeFileSection& d1, const PeFileSection& d2){
 	return d1.sectionHeader.PointerToRawData < d2.sectionHeader.PointerToRawData;
 }
-bool SortByVirtualAddress(const PeFileSection& d1, const PeFileSection& d2)
-{
+bool SortByVirtualAddress(const PeFileSection& d1, const PeFileSection& d2){
 	return d1.sectionHeader.VirtualAddress < d2.sectionHeader.VirtualAddress;
+}
+void Report_DosHeader(IMAGE_DOS_HEADER* dosHeader){
+	LogA("Report dos header detail from :", dosHeader);
+	if (!dosHeader){
+		LogA("Error: dos header pointer is Null !");
+		return;
+	}
+	IMAGE_DOS_HEADER& p = *dosHeader;
+	LogA("    e_magic : 0x%04X", p.e_magic);
+	LogA("    e_cblp : 0x%04X", p.e_cblp);
+	LogA("    e_cp : 0x%04X", p.e_cp);
+	LogA("    e_crlc : 0x%04X", p.e_crlc);
+	LogA("    e_cparhdr : 0x%04X", p.e_cparhdr);
+	LogA("    e_minalloc : 0x%04X", p.e_minalloc);
+	LogA("    e_maxalloc : 0x%04X", p.e_maxalloc);
+	LogA("    e_ss : 0x%04X", p.e_ss);
+	LogA("    e_sp : 0x%04X", p.e_sp);
+	LogA("    e_csum : 0x%04X", p.e_csum);
+	LogA("    e_ip : 0x%04X", p.e_ip);
+	LogA("    e_cs : 0x%04X", p.e_cs);
+	LogA("    e_lfarlc : 0x%04X", p.e_lfarlc);
+	LogA("    e_res[4] : 0x%04X,0x%04X,0x%04X,0x%04X,", p.e_res[0], p.e_res[1], p.e_res[2], p.e_res[3]);
+	LogA("    e_oemid : 0x%04X", p.e_oemid);
+	LogA("    e_oeminfo : 0x%04X", p.e_oeminfo);
+	LogA("    e_res2[10] : 0x%04X,0x%04X,0x%04X,0x%04X,0x%04X,0x%04X,0x%04X,0x%04X,0x%04X,0x%04X,", p.e_res2[0],
+		p.e_res2[1], p.e_res2[2],p.e_res2[3], p.e_res2[4], p.e_res2[5], p.e_res2[6], p.e_res2[7], p.e_res2[8], p.e_res2[9]);
+	LogA("    e_lfanew : 0x%08lX", p.e_lfanew);
 }
 bool PeTool::InitFromNotMapedPeBuffer(void *pData, DWORD nSize){
 	unsigned char* pReadPtr = (unsigned char*)pData;
-
+	//bool bLog = true;
+	LogA("Init From not Maped Pe Buffer Begin");
 	//get dos header
 	_pDosHeader = (PIMAGE_DOS_HEADER)LocalAlloc(LPTR, sizeof(IMAGE_DOS_HEADER));
+	LogA("Read dos header from:0x%p to: 0x%p", pReadPtr,_pDosHeader);
 	memcpy(_pDosHeader, pReadPtr, sizeof(IMAGE_DOS_HEADER));
 	pReadPtr += sizeof(IMAGE_DOS_HEADER);
+	Report_DosHeader(_pDosHeader);
 
 	//get dos stub
 	_dwDosStubSize = _pDosHeader->e_lfanew - sizeof(IMAGE_DOS_HEADER);

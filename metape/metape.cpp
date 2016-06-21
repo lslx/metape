@@ -73,7 +73,8 @@ typedef struct _RunInfo{
 extern "C" {
 	__declspec(dllexport) int origin_main(void)
 	{
-		LogA("what:%d,%s", 25, "fk a");
+// 		LogA("what:%d,%s", 25, "fk a");
+// 		LogW(L"what:%d,%s", 25, L"fk a");
 
 		return _tmainCRTStartup();
 

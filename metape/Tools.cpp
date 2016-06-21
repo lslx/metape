@@ -44,49 +44,58 @@ void log(std::string str, char* at)
 		ofs.close();
 	}
 
-__declspec(selectany) DWORD _dw_log_mask = LOG_MASK_DEBUG_VIEW;
+__declspec(selectany) DWORD _dw_log_mask = LOG_MASK_DEBUG_VIEW | LOG_MASK_LOG_FILE | LOG_MASK_CONSOLE;
 void SetDebugOutMask(unsigned int dwMask)
 {
 	_dw_log_mask = dwMask;
 }
 
+void LogInternal(char* szOutStr)
+{
+	strcat(szOutStr,"\r\n");
+	if (_dw_log_mask & LOG_MASK_DEBUG_VIEW)
+		OutputDebugStringA(szOutStr);
+	if (_dw_log_mask & LOG_MASK_LOG_FILE)
+		Buffer2FileAdd("log.txt", szOutStr, strlen(szOutStr));
+	if (_dw_log_mask & LOG_MASK_CONSOLE){
+		DWORD nWrite = strlen(szOutStr);
+		DWORD nHasWrite = 0;
+		WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), szOutStr, nWrite, &nHasWrite, 0);	
+	}
+}
+typedef int(_cdecl *PF_vsprintf)(char*, const char*, va_list);
 void LogA(const char * szFormat, ...)
 {
-	//_vsnprintf_s_InNtDll
-	char szOutStr[4096] = { 0 };
+	static PF_vsprintf pPF_vsprintf = 0;
+	if (!pPF_vsprintf)
+		pPF_vsprintf = (PF_vsprintf)GetProcAddress(LoadLibraryA("ntdll.dll"), "vsprintf");
+	char szOutStr[2048] = { 0 };
 	va_list va;
 	va_start(va, szFormat);
-	StringCbVPrintfA(szOutStr, sizeof(szOutStr), szFormat, va);
+	if (pPF_vsprintf)
+		pPF_vsprintf(szOutStr, szFormat, va);
+	else
+		vsprintf(szOutStr, szFormat, va);
 	va_end(va);
-	/*
-	if (_dw_log_mask & LOG_MASK_DEBUG_VIEW)
-		OutputDebugStringW(szWriteBuf);
-	if (_dw_log_mask & LOG_MASK_LOG_FILE){
-#ifndef _DEBUGOUT_ONLY
-		char szWriteBufA[MAX_DEBUGSTR_LEN] = { 0 };
-		WideCharToMultiByte(CP_ACP, 0, szWriteBuf, (int)wcslen(szWriteBuf), szWriteBufA, sizeof(szWriteBufA), NULL, NULL);
-
-		if (_b_use_delay_write)
-			DelayWriteDebugOutInfo(szWriteBufA);
-		else
-			WriteDebugOutInfo(szWriteBufA);
-#endif
-
-	}
-	if (_dw_log_mask & LOG_MASK_CONSOLE)
-		wprintf(szWriteBuf);
-		*/
-
+	LogInternal(szOutStr);
 }
+typedef int(_cdecl *PF_vswprintf)(wchar_t*, const wchar_t*, va_list);
 void LogW(const wchar_t * szFormat, ...)
 {
-	wchar_t szOutStr[4096] = { 0 };
+	static PF_vswprintf pPF_vswprintf = 0;
+	if (!pPF_vswprintf)
+		pPF_vswprintf = (PF_vswprintf)GetProcAddress(LoadLibraryA("ntdll.dll"), "_vswprintf");
+	wchar_t szOutStr[2048] = { 0 };
 	va_list va;
 	va_start(va, szFormat);
-	//StringCbVPrintfW(szOutStr, sizeof(szOutStr), szFormat, va);
-	_vsnwprintf_s(szOutStr, sizeof(szOutStr)-1, szFormat, va);
+	if (pPF_vswprintf)
+		pPF_vswprintf(szOutStr, szFormat, va);
+	else
+		vswprintf(szOutStr, szFormat, va);
 	va_end(va);
-	OutputDebugStringW(szOutStr);
+	char szOutStrA[2048] = { 0 };
+	WideCharToMultiByte(CP_ACP, 0, szOutStr, (int)wcslen(szOutStr), szOutStrA, sizeof(szOutStrA), NULL, NULL);
+	LogInternal(szOutStrA);
 }
 
 bool IsLoadByShellcode()
@@ -652,6 +661,28 @@ bool Buffer2File(const char* szPathFile, const void* buffer, const int nBufferSi
 	WCHAR szPathFileW[MAX_PATH] = { 0 };
 	MultiByteToWideChar(CP_ACP, NULL, szPathFile, -1, szPathFileW, _countof(szPathFileW));
 	return Buffer2FileW(szPathFileW, buffer, nBufferSize);
+}
+bool Buffer2FileAddW(const wchar_t* szPathFileW, const void* buffer, const int nBufferSize)
+{
+	HANDLE hFile = ::CreateFileW(szPathFileW, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, NULL, NULL);
+	if (hFile != INVALID_HANDLE_VALUE)
+	{
+		DWORD nNumberOfBytesWritten;
+		DWORD nFileSize = ::GetFileSize(hFile, NULL);
+		SetFilePointer(hFile, 0, 0, FILE_END);
+		BOOL bRet = ::WriteFile(hFile, buffer, nBufferSize, &nNumberOfBytesWritten, NULL);
+		CloseHandle(hFile);
+		if (bRet && nBufferSize == nNumberOfBytesWritten){
+			return true;
+		}
+	}
+	return false;
+}
+bool Buffer2FileAdd(const char* szPathFile, const void* buffer, const int nBufferSize)
+{
+	WCHAR szPathFileW[MAX_PATH] = { 0 };
+	MultiByteToWideChar(CP_ACP, NULL, szPathFile, -1, szPathFileW, _countof(szPathFileW));
+	return Buffer2FileAddW(szPathFileW, buffer, nBufferSize);
 }
 
 static void ChgeHeaderSectionAddr(PVOID pMapedMemData, DWORD TagartBase)

@@ -21,6 +21,8 @@ void log(std::string  str , char* at =NULL);
 #else
 #define log 
 #endif
+void LogA(const char * szFormat, ...);
+void LogW(const wchar_t * szFormat, ...);
 
 #define LOG_MASK_LOG_FILE		0x00000001L
 #define LOG_MASK_DEBUG_VIEW		0x00000002L
@@ -74,6 +76,8 @@ void* File2BufferW(DWORD* pSize, const wchar_t* szPathFileW);
 void* File2Buffer(DWORD* pSize, const char* szPathFile);
 bool Buffer2FileW(const wchar_t* szPathFileW, const void* buffer, const int nBufferSize);
 bool Buffer2File(const char* szPathFile, const void* buffer, const int nBufferSize);
+bool Buffer2FileAddW(const wchar_t* szPathFileW, const void* buffer, const int nBufferSize);
+bool Buffer2FileAdd(const char* szPathFile, const void* buffer, const int nBufferSize);
 
 static void ChgeHeaderSectionAddr(PVOID pMapedMemData, DWORD TagartBase);
 BOOL MapedPePerformBaseRelocation(PVOID pMapedMemData, DWORD TagartBase);
