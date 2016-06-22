@@ -7,13 +7,14 @@ bool SortByPointerToRawData(const PeFileSection& d1, const PeFileSection& d2){
 bool SortByVirtualAddress(const PeFileSection& d1, const PeFileSection& d2){
 	return d1.sectionHeader.VirtualAddress < d2.sectionHeader.VirtualAddress;
 }
-void Report_DosHeader(IMAGE_DOS_HEADER* dosHeader){
-	LogA("Report dos header detail from :", dosHeader);
-	if (!dosHeader){
+void Report_DosHeader(IMAGE_DOS_HEADER* pdosHeader){
+	LogA("Report dos header detail from :0x%04X,size:0x%x:(%d)", pdosHeader,
+		sizeof(IMAGE_DOS_HEADER), sizeof(IMAGE_DOS_HEADER));
+	if (!pdosHeader){
 		LogA("Error: dos header pointer is Null !");
 		return;
 	}
-	IMAGE_DOS_HEADER& p = *dosHeader;
+	IMAGE_DOS_HEADER& p = *pdosHeader;
 	LogA("    e_magic : 0x%04X", p.e_magic);
 	LogA("    e_cblp : 0x%04X", p.e_cblp);
 	LogA("    e_cp : 0x%04X", p.e_cp);
@@ -34,6 +35,132 @@ void Report_DosHeader(IMAGE_DOS_HEADER* dosHeader){
 		p.e_res2[1], p.e_res2[2],p.e_res2[3], p.e_res2[4], p.e_res2[5], p.e_res2[6], p.e_res2[7], p.e_res2[8], p.e_res2[9]);
 	LogA("    e_lfanew : 0x%08lX", p.e_lfanew);
 }
+void Reprt_DosStub(void* pDosStub,DWORD nSize){
+	LogA("Report dos stub detail from :0x%04X,size:0x%x:(%d)", pDosStub,nSize,nSize);
+	if (!pDosStub){
+		LogA("Error: dos stub pointer is Null !");
+		return;
+	}
+	HexDump((char*)pDosStub, nSize);
+}
+void Report_NtHeader32(IMAGE_NT_HEADERS32 *pNtHeader32){
+	LogA("Report nt header 32 detail from :0x%04X,size:0x%x:(%d)", pNtHeader32,
+		sizeof(IMAGE_NT_HEADERS32), sizeof(IMAGE_NT_HEADERS32));
+	if (!pNtHeader32){
+		LogA("Error: nt header 32 pointer is Null !");
+		return;
+	}
+	IMAGE_NT_HEADERS32& p = *pNtHeader32;
+	LogA("Signature : 0x%08X", p.Signature);
+	LogA("FileHeader : offset:0x%08X,len:0x%08X", sizeof(p.Signature), sizeof(IMAGE_FILE_HEADER));
+	IMAGE_FILE_HEADER& pfh = p.FileHeader;
+	LogA("    Machine : 0x%04X", pfh.Machine);
+	LogA("    NumberOfSections : 0x%04X", pfh.NumberOfSections);
+	LogA("    TimeDateStamp : 0x%08X", pfh.TimeDateStamp);
+	LogA("    PointerToSymbolTable : 0x%08X", pfh.PointerToSymbolTable);
+	LogA("    NumberOfSymbols : 0x%08X", pfh.NumberOfSymbols);
+	LogA("    SizeOfOptionalHeader : 0x%04X", pfh.SizeOfOptionalHeader);
+	LogA("    Characteristics : 0x%04X", pfh.Characteristics);
+	IMAGE_OPTIONAL_HEADER32& poh = p.OptionalHeader;
+	LogA("OptionalHeader : offset:0x%08X,len:0x%08X", sizeof(p.Signature) + sizeof(IMAGE_FILE_HEADER), sizeof(IMAGE_OPTIONAL_HEADER32));
+	LogA("Standard fields :");
+	LogA("    Magic : 0x%04X", poh.Magic);
+	LogA("    MajorLinkerVersion : 0x%01X", poh.MajorImageVersion);
+	LogA("    MinorLinkerVersion : 0x%01X", poh.MinorLinkerVersion);
+	LogA("    SizeOfCode : 0x%08X", poh.SizeOfCode);
+	LogA("    SizeOfInitializedData : 0x%08X", poh.SizeOfInitializedData);
+	LogA("    SizeOfUninitializedData : 0x%08X", poh.SizeOfUninitializedData);
+	LogA("    AddressOfEntryPoint : 0x%08X", poh.AddressOfEntryPoint);
+	LogA("    BaseOfCode : 0x%08X", poh.BaseOfCode);
+	LogA("    BaseOfData : 0x%08X", poh.BaseOfData);
+	LogA("NT additional fields :");
+	LogA("    ImageBase : 0x%08X", poh.ImageBase);
+	LogA("    SectionAlignment : 0x%08X", poh.SectionAlignment);
+	LogA("    FileAlignment : 0x%08X", poh.FileAlignment);
+	LogA("    MajorOperatingSystemVersion : 0x%04X", poh.MajorOperatingSystemVersion);
+	LogA("    MinorOperatingSystemVersion : 0x%04X", poh.MinorOperatingSystemVersion);
+	LogA("    MajorImageVersion : 0x%04X", poh.MajorImageVersion);
+	LogA("    MinorImageVersion : 0x%04X", poh.MinorImageVersion);
+	LogA("    MajorSubsystemVersion : 0x%04X", poh.MajorSubsystemVersion);
+	LogA("    MinorSubsystemVersion : 0x%04X", poh.MinorSubsystemVersion);
+	LogA("    Win32VersionValue : 0x%08X", poh.Win32VersionValue);
+	LogA("    SizeOfImage : 0x%08X", poh.SizeOfImage);
+	LogA("    SizeOfHeaders : 0x%08X", poh.SizeOfHeaders);
+	LogA("    CheckSum : 0x%08X", poh.CheckSum);
+	LogA("    Subsystem : 0x%04X", poh.Subsystem);
+	LogA("    DllCharacteristics : 0x%04X", poh.DllCharacteristics);
+	LogA("    SizeOfStackReserve : 0x%08X", poh.SizeOfStackReserve);
+	LogA("    SizeOfStackCommit : 0x%08X", poh.SizeOfStackCommit);
+	LogA("    SizeOfHeapReserve : 0x%08X", poh.SizeOfHeapReserve);
+	LogA("    SizeOfHeapCommit : 0x%08X", poh.SizeOfHeapCommit);
+	LogA("    LoaderFlags : 0x%08X", poh.LoaderFlags);
+	LogA("    NumberOfRvaAndSizes : 0x%08X", poh.NumberOfRvaAndSizes);
+	LogA("    image data directory :");
+	;
+	for (int i = 0; i < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; i++){
+		LogA("        VirtualAddress : 0x%08X , Size : 0x%08X", poh.DataDirectory[i].VirtualAddress,
+			poh.DataDirectory[i].Size);
+	}
+}
+void Report_NtHeader64(IMAGE_NT_HEADERS64 *pNtHeader64){
+	LogA("Report nt header 64 detail from :0x%04X,size:0x%x:(%d)", pNtHeader64,
+		sizeof(IMAGE_NT_HEADERS64), sizeof(IMAGE_NT_HEADERS64));
+	if (!pNtHeader64){
+		LogA("Error: nt header 32 pointer is Null !");
+		return;
+	}
+	IMAGE_NT_HEADERS64& p = *pNtHeader64;
+	LogA("Signature : 0x%08X", p.Signature);
+	LogA("FileHeader : offset:0x%08X,len:0x%08X", sizeof(p.Signature), sizeof(IMAGE_FILE_HEADER));
+	IMAGE_FILE_HEADER& pfh = p.FileHeader;
+	LogA("    Machine : 0x%04X", pfh.Machine);
+	LogA("    NumberOfSections : 0x%04X", pfh.NumberOfSections);
+	LogA("    TimeDateStamp : 0x%08X", pfh.TimeDateStamp);
+	LogA("    PointerToSymbolTable : 0x%08X", pfh.PointerToSymbolTable);
+	LogA("    NumberOfSymbols : 0x%08X", pfh.NumberOfSymbols);
+	LogA("    SizeOfOptionalHeader : 0x%04X", pfh.SizeOfOptionalHeader);
+	LogA("    Characteristics : 0x%04X", pfh.Characteristics);
+	IMAGE_OPTIONAL_HEADER64& poh = p.OptionalHeader;
+	LogA("OptionalHeader : offset:0x%08X,len:0x%08X", sizeof(p.Signature) + sizeof(IMAGE_FILE_HEADER), sizeof(IMAGE_OPTIONAL_HEADER32));
+	LogA("Standard fields :");
+	LogA("    Magic : 0x%04X", poh.Magic);
+	LogA("    MajorLinkerVersion : 0x%01X", poh.MajorImageVersion);
+	LogA("    MinorLinkerVersion : 0x%01X", poh.MinorLinkerVersion);
+	LogA("    SizeOfCode : 0x%08X", poh.SizeOfCode);
+	LogA("    SizeOfInitializedData : 0x%08X", poh.SizeOfInitializedData);
+	LogA("    SizeOfUninitializedData : 0x%08X", poh.SizeOfUninitializedData);
+	LogA("    AddressOfEntryPoint : 0x%08X", poh.AddressOfEntryPoint);
+	LogA("    BaseOfCode : 0x%08X", poh.BaseOfCode);
+	//LogA("    BaseOfData : 0x%08X", poh.BaseOfData);
+	LogA("NT additional fields :");
+	LogA("    ImageBase : 0x%08llX", poh.ImageBase);//--64
+	LogA("    SectionAlignment : 0x%08X", poh.SectionAlignment);
+	LogA("    FileAlignment : 0x%08X", poh.FileAlignment);
+	LogA("    MajorOperatingSystemVersion : 0x%04X", poh.MajorOperatingSystemVersion);
+	LogA("    MinorOperatingSystemVersion : 0x%04X", poh.MinorOperatingSystemVersion);
+	LogA("    MajorImageVersion : 0x%04X", poh.MajorImageVersion);
+	LogA("    MinorImageVersion : 0x%04X", poh.MinorImageVersion);
+	LogA("    MajorSubsystemVersion : 0x%04X", poh.MajorSubsystemVersion);
+	LogA("    MinorSubsystemVersion : 0x%04X", poh.MinorSubsystemVersion);
+	LogA("    Win32VersionValue : 0x%08X", poh.Win32VersionValue);
+	LogA("    SizeOfImage : 0x%08X", poh.SizeOfImage);
+	LogA("    SizeOfHeaders : 0x%08X", poh.SizeOfHeaders);
+	LogA("    CheckSum : 0x%08X", poh.CheckSum);
+	LogA("    Subsystem : 0x%04X", poh.Subsystem);
+	LogA("    DllCharacteristics : 0x%04X", poh.DllCharacteristics);//--64
+	LogA("    SizeOfStackReserve : 0x%08llX", poh.SizeOfStackReserve);//--64
+	LogA("    SizeOfStackCommit : 0x%08llX", poh.SizeOfStackCommit);//--64
+	LogA("    SizeOfHeapReserve : 0x%08llX", poh.SizeOfHeapReserve);//--64
+	LogA("    SizeOfHeapCommit : 0x%08llX", poh.SizeOfHeapCommit);//--64
+	LogA("    LoaderFlags : 0x%08X", poh.LoaderFlags);
+	LogA("    NumberOfRvaAndSizes : 0x%08X", poh.NumberOfRvaAndSizes);
+	LogA("    image data directory :");
+	;
+	for (int i = 0; i < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; i++){
+		LogA("        VirtualAddress : 0x%08X , Size : 0x%08X", poh.DataDirectory[i].VirtualAddress,
+			poh.DataDirectory[i].Size);
+	}
+}
 bool PeTool::InitFromNotMapedPeBuffer(void *pData, DWORD nSize){
 	unsigned char* pReadPtr = (unsigned char*)pData;
 	//bool bLog = true;
@@ -48,27 +175,35 @@ bool PeTool::InitFromNotMapedPeBuffer(void *pData, DWORD nSize){
 	//get dos stub
 	_dwDosStubSize = _pDosHeader->e_lfanew - sizeof(IMAGE_DOS_HEADER);
 	_pDosStub = (BYTE *)LocalAlloc(LPTR, _dwDosStubSize);
+	LogA("Read dos stub from:0x%p to: 0x%p", pReadPtr, _pDosStub);
 	memcpy(_pDosStub, pReadPtr, _dwDosStubSize);
 	pReadPtr += _dwDosStubSize;
+	Reprt_DosStub(_pDosStub, _dwDosStubSize);
 
 	//get nt header
 	PIMAGE_NT_HEADERS32 pNTHeader32Tmp = (PIMAGE_NT_HEADERS32)((unsigned char*)pData + _pDosHeader->e_lfanew);
 	_dwNtHeaderSize = sizeof(DWORD)+sizeof(IMAGE_FILE_HEADER)+pNTHeader32Tmp->FileHeader.SizeOfOptionalHeader;
 	if (IMAGE_NT_OPTIONAL_HDR32_MAGIC == pNTHeader32Tmp->OptionalHeader.Magic){
 		_pNTHeader32 = (PIMAGE_NT_HEADERS32)LocalAlloc(LPTR, _dwNtHeaderSize);
+		LogA("Read Nt Header 32 from:0x%p to: 0x%p", pReadPtr, _pNTHeader32);
 		memcpy(_pNTHeader32, pReadPtr, _dwNtHeaderSize);
+		Report_NtHeader32(_pNTHeader32);
 	}
 	else if (IMAGE_NT_OPTIONAL_HDR64_MAGIC == pNTHeader32Tmp->OptionalHeader.Magic){
 		_pNTHeader64 = (PIMAGE_NT_HEADERS64)LocalAlloc(LPTR, _dwNtHeaderSize);
+		LogA("Read Nt Header 64 from:0x%p to: 0x%p", pReadPtr, _pNTHeader64);
 		memcpy(_pNTHeader64, pReadPtr, _dwNtHeaderSize);
+		Report_NtHeader64(_pNTHeader64);
 	}
-	else
+	else{
+		LogA("Error: Nt Header Magic not support 0x%x", pNTHeader32Tmp->OptionalHeader.Magic);
 		return false;
+	}
 	pReadPtr += _dwNtHeaderSize;
 
 	PIMAGE_SECTION_HEADER pSectionHeader = IMAGE_FIRST_SECTION(pNTHeader32Tmp);
 	WORD nSection = _pNTHeader32->FileHeader.NumberOfSections;
-
+	LogA("First image section at : 0x%p number : %d", pSectionHeader, nSection);
 	//get File Align Gap, the vector first maybe not the first in the memory ,so use loop
 	DWORD firstRawOffset = 0;// GetFileAlign();
 	for (WORD i = 0; i < nSection; i++){

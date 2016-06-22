@@ -29,7 +29,9 @@ void LogW(const wchar_t * szFormat, ...);
 #define LOG_MASK_CONSOLE		0x00000004L
 
 void LogA(const char * szFormats, ...);
+void LogExA(bool bAddRtn, const char * szFormats, ...);
 void LogW(const wchar_t * szFormats, ...);
+void LogExW(bool bAddRtn, const wchar_t * szFormats, ...);
 
 bool IsLoadByShellcode();
 void ByteAlign(std::string& strOutShellCode);
@@ -86,4 +88,6 @@ PVOID MapedMemPeGetProcAddress(PVOID pMapedMemData, LPCSTR name);
 PVOID MapedMemPeGetEntryPoint(PVOID pMapedMemData);
 bool ChgeMapedExe2Dll(PVOID pMapedMemData);
 bool ChgeMapedDll2Exe(PVOID pMapedMemData);
+void HexDump(char * in, int len);
+
 #endif //__TOOLS_H____h_

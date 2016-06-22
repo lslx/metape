@@ -50,9 +50,9 @@ void SetDebugOutMask(unsigned int dwMask)
 	_dw_log_mask = dwMask;
 }
 
-void LogInternal(char* szOutStr)
-{
-	strcat(szOutStr,"\r\n");
+void LogInternal(bool bAddRtn, char* szOutStr){
+	if (bAddRtn)
+		strcat(szOutStr,"\r\n");
 	if (_dw_log_mask & LOG_MASK_DEBUG_VIEW)
 		OutputDebugStringA(szOutStr);
 	if (_dw_log_mask & LOG_MASK_LOG_FILE)
@@ -64,8 +64,7 @@ void LogInternal(char* szOutStr)
 	}
 }
 typedef int(_cdecl *PF_vsprintf)(char*, const char*, va_list);
-void LogA(const char * szFormat, ...)
-{
+void LogExA(bool bAddRtn, const char * szFormat, ...){
 	static PF_vsprintf pPF_vsprintf = 0;
 	if (!pPF_vsprintf)
 		pPF_vsprintf = (PF_vsprintf)GetProcAddress(LoadLibraryA("ntdll.dll"), "vsprintf");
@@ -77,11 +76,24 @@ void LogA(const char * szFormat, ...)
 	else
 		vsprintf(szOutStr, szFormat, va);
 	va_end(va);
-	LogInternal(szOutStr);
+	LogInternal(bAddRtn, szOutStr);
+}
+void LogA(const char * szFormat, ...){
+	static PF_vsprintf pPF_vsprintf = 0;
+	if (!pPF_vsprintf)
+		pPF_vsprintf = (PF_vsprintf)GetProcAddress(LoadLibraryA("ntdll.dll"), "vsprintf");
+	char szOutStr[2048] = { 0 };
+	va_list va;
+	va_start(va, szFormat);
+	if (pPF_vsprintf)
+		pPF_vsprintf(szOutStr, szFormat, va);
+	else
+		vsprintf(szOutStr, szFormat, va);
+	va_end(va);
+	LogInternal(true, szOutStr);
 }
 typedef int(_cdecl *PF_vswprintf)(wchar_t*, const wchar_t*, va_list);
-void LogW(const wchar_t * szFormat, ...)
-{
+void LogExW(bool bAddRtn, const wchar_t * szFormat, ...){
 	static PF_vswprintf pPF_vswprintf = 0;
 	if (!pPF_vswprintf)
 		pPF_vswprintf = (PF_vswprintf)GetProcAddress(LoadLibraryA("ntdll.dll"), "_vswprintf");
@@ -95,9 +107,24 @@ void LogW(const wchar_t * szFormat, ...)
 	va_end(va);
 	char szOutStrA[2048] = { 0 };
 	WideCharToMultiByte(CP_ACP, 0, szOutStr, (int)wcslen(szOutStr), szOutStrA, sizeof(szOutStrA), NULL, NULL);
-	LogInternal(szOutStrA);
+	LogInternal(bAddRtn, szOutStrA);
 }
-
+void LogW(const wchar_t * szFormat, ...){
+	static PF_vswprintf pPF_vswprintf = 0;
+	if (!pPF_vswprintf)
+		pPF_vswprintf = (PF_vswprintf)GetProcAddress(LoadLibraryA("ntdll.dll"), "_vswprintf");
+	wchar_t szOutStr[2048] = { 0 };
+	va_list va;
+	va_start(va, szFormat);
+	if (pPF_vswprintf)
+		pPF_vswprintf(szOutStr, szFormat, va);
+	else
+		vswprintf(szOutStr, szFormat, va);
+	va_end(va);
+	char szOutStrA[2048] = { 0 };
+	WideCharToMultiByte(CP_ACP, 0, szOutStr, (int)wcslen(szOutStr), szOutStrA, sizeof(szOutStrA), NULL, NULL);
+	LogInternal(true, szOutStrA);
+}
 bool IsLoadByShellcode()
 {
 	MEMORY_BASIC_INFORMATION memInfo;
@@ -616,7 +643,13 @@ char instbyte[] =
 void* File2BufferW(DWORD* pSize, const wchar_t* szPathFileW)
 {
 	char* lpBuffer = NULL;
-	HANDLE hFile = ::CreateFileW(szPathFileW, GENERIC_READ, 0, NULL, OPEN_EXISTING, NULL, NULL);
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+	for (int i = 0; i < 3; i++){
+		hFile = ::CreateFileW(szPathFileW, GENERIC_READ, 0, NULL, OPEN_EXISTING, NULL, NULL);
+		if (hFile != INVALID_HANDLE_VALUE)
+			break;
+		Sleep(1000);
+	}
 	if (hFile != INVALID_HANDLE_VALUE)
 	{
 		DWORD nFileSize = ::GetFileSize(hFile, NULL);
@@ -873,4 +906,33 @@ bool ChgeMapedDll2Exe(PVOID pMapedMemData)
 		return true;
 	}
 	return false;
+}
+void dtoh(UINT8 * hex, UINT8 n){
+	static const UINT8 HEX[] = "0123456789ABCDEF";
+	hex[0] = HEX[n / 16];
+	hex[1] = HEX[n % 16];
+}
+void dump_block(char * in, char * out, int len){
+	for (int cur = 0; cur < len; cur++){
+		dtoh((UINT8*)out + 2 * cur, in[cur]);
+	}
+}
+void hex_disp(char * in, int len, int size){
+	int cur = 0;
+	int row_cnt = 0;
+	LogExA(false,"%08dh:", row_cnt++);
+	do {
+		LogExA(false, "0x%-3.2s", in + size * cur);
+		cur++;
+		if (cur % 8 == 0){
+			LogExA(false, "\n%08dh:", row_cnt++);
+		}
+	} while (cur < len);
+}
+void HexDump(char * in, int len){
+	char * out = (char *)malloc(len * 2 + 1);
+	out[len * 2] = 0;
+	dump_block(in, out, len);
+	hex_disp(out, len, 2);
+	free(out);
 }
