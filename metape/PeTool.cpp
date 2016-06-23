@@ -131,7 +131,7 @@ void Report_NtHeader64(IMAGE_NT_HEADERS64 *pNtHeader64){
 	LogA("    SizeOfUninitializedData : 0x%08X", poh.SizeOfUninitializedData);
 	LogA("    AddressOfEntryPoint : 0x%08X", poh.AddressOfEntryPoint);
 	LogA("    BaseOfCode : 0x%08X", poh.BaseOfCode);
-	//LogA("    BaseOfData : 0x%08X", poh.BaseOfData);
+	//LogA("    BaseOfData : 0x%08X", poh.BaseOfData);//--64 del
 	LogA("NT additional fields :");
 	LogA("    ImageBase : 0x%08llX", poh.ImageBase);//--64
 	LogA("    SectionAlignment : 0x%08X", poh.SectionAlignment);
@@ -202,7 +202,10 @@ bool PeTool::InitFromNotMapedPeBuffer(void *pData, DWORD nSize){
 	pReadPtr += _dwNtHeaderSize;
 
 	PIMAGE_SECTION_HEADER pSectionHeader = IMAGE_FIRST_SECTION(pNTHeader32Tmp);
-	WORD nSection = _pNTHeader32->FileHeader.NumberOfSections;
+	WORD nSection = 0;
+	if (IsPe32())
+		nSection = _pNTHeader32->FileHeader.NumberOfSections;
+	else nSection = _pNTHeader64->FileHeader.NumberOfSections;
 	LogA("First image section at : 0x%p number : %d", pSectionHeader, nSection);
 	//get File Align Gap, the vector first maybe not the first in the memory ,so use loop
 	DWORD firstRawOffset = 0;// GetFileAlign();

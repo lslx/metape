@@ -1003,6 +1003,12 @@ PVOID MemryModuleGetBase(HMEMORYMODULE module)
 		return ((PMEMORYMODULE)module)->codeBase;
 	return 0;
 }
+DWORD MemryModuleGetSize(HMEMORYMODULE module)
+{
+	if (module)
+		return ((PMEMORYMODULE)module)->headers->OptionalHeader.SizeOfImage;
+	return 0;
+}
 
 
 /*  my func bk

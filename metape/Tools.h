@@ -85,6 +85,7 @@ static void ChgeHeaderSectionAddr(PVOID pMapedMemData, DWORD TagartBase);
 BOOL MapedPePerformBaseRelocation(PVOID pMapedMemData, DWORD TagartBase);
 SIZE_T GetMemImageSize(void* ImageBase);
 PVOID MapedMemPeGetProcAddress(PVOID pMapedMemData, LPCSTR name);
+PVOID MapedMemPeGetVarAddress(PVOID pMapedMemData, LPCSTR name);
 PVOID MapedMemPeGetEntryPoint(PVOID pMapedMemData);
 bool ChgeMapedExe2Dll(PVOID pMapedMemData);
 bool ChgeMapedDll2Exe(PVOID pMapedMemData);

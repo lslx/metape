@@ -163,6 +163,7 @@ void MemoryDefaultFreeLibrary(HCUSTOMMODULE, void *);
 
 // add by fhc:
 PVOID MemryModuleGetBase(HMEMORYMODULE module);
+DWORD MemryModuleGetSize(HMEMORYMODULE module);
 // add end
 
 #ifdef __cplusplus

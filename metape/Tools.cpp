@@ -865,6 +865,10 @@ PVOID MapedMemPeGetProcAddress(PVOID pMapedMemData, LPCSTR name)
 	// AddressOfFunctions contains the RVAs to the "real" functions
 	return (LPVOID)(nt_header->OptionalHeader.ImageBase + (*(DWORD *)(codeBase + exports->AddressOfFunctions + (idx * 4))));
 }
+PVOID MapedMemPeGetVarAddress(PVOID pMapedMemData, LPCSTR name)
+{
+	return MapedMemPeGetProcAddress(pMapedMemData, name);
+}
 PVOID MapedMemPeGetEntryPoint(PVOID pMapedMemData)
 {
 	PIMAGE_DOS_HEADER dos_header = (PIMAGE_DOS_HEADER)pMapedMemData;
