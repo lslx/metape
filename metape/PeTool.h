@@ -4,6 +4,58 @@
 #include <vector>
 
 #define ALIGN_VALUE_UP(value, alignment)    (((value) + (alignment) - 1) & ~((alignment) - 1))
+enum E_DataType{
+	eNoType,
+	eDosHeader,
+	eDosStub,
+	eNtHeader,
+	eNtHeaderGap,
+	eSectionHeader,
+	eSectionHeaderGap,
+	eSection,
+	eSectionGap,
+	eOverLay,
+};
+enum E_DataUsageType{
+	euNoType,
+	euDosHeader,
+	euDosStub,
+	euNtHeader,
+	euNtHeaderGap,
+	euSectionHeader,
+	euSectionHeaderGap,
+	euExportTable,
+	euImportTable,
+	euResourcesTable,
+	euExceptionTable,
+	euSecurityTable,
+	euBaseRelocationTable,
+	euDebug,
+	euCopyright,
+	euGlobalPtr,
+	euThreadLocalStorage,
+	euLoadConfig,
+	euBoundImport,
+	euImportAddressTable,
+	euDelayImport,
+	euComDescriptor,
+};
+typedef struct _PointerInfo{
+	E_DataType eDataType;
+	E_DataUsageType eDataUsageType;
+	DWORD dwOffsetOfNotMaped;
+	DWORD dwOffsetOfMaped;
+}PointerInfo, *PPointerInfo;
+typedef struct _RunInfo{
+	char JmpCodex86[64];
+	char JmpCodex64[64];
+	int iMoveCount;
+	void* pCopyMemImage = 0;
+	SIZE_T CopyMemImageSize = 0;
+
+}RunInfo, *PRunInfo;
+extern "C" __declspec(dllexport) PRunInfo g_pRunInfo;
+
 
 class PeFileSection {
 public:
@@ -50,6 +102,7 @@ public:
 	};
 	~PeTool(){};
 	void Test();
+	void Test2();
 	bool InitFromPeFileW(wchar_t* szPathFile);
 	bool InitFromPeFile(char* szPathFile);
 	bool InitFromNotMapedPeBuffer(void *pData, DWORD nSize);
@@ -71,6 +124,7 @@ public:
 			return _pNTHeader32->OptionalHeader.SectionAlignment;
 		else return _pNTHeader32->OptionalHeader.SectionAlignment;
 	}
+	bool GetPointerInfo(DWORD64 pointer, PointerInfo* pPointerInfo);
 private:
 	E_PeStatus _eStatus;
 

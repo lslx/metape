@@ -929,7 +929,7 @@ void hex_disp(char * in, int len, int size){
 		LogExA(false, "0x%-3.2s", in + size * cur);
 		cur++;
 		if (cur % 8 == 0){
-			LogExA(false, "\n%08dh:", row_cnt++);
+			LogExA(false, "\r\n%08dh:", row_cnt++);
 		}
 	} while (cur < len);
 }

@@ -807,7 +807,8 @@ char ExeMod[] = {
 #ifdef _WIN64
 #include "G:\dev_code\metape_data\netpass-x64\netpass.exe.txt"
 #else
-#include "G:\dev_code_x\patchframe\LdrEx\netpass_unpack.txt"
+	0x00
+//#include "G:\dev_code_x\patchframe\LdrEx\netpass_unpack.txt"
 #endif
 };
 int iExeModLen = sizeof(ExeMod);

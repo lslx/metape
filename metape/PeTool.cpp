@@ -1,6 +1,9 @@
 #include "PeTool.h"
 #include "Tools.h"
 #include <algorithm>
+
+extern "C" __declspec(dllexport) PRunInfo g_pRunInfo = 0;
+
 bool SortByPointerToRawData(const PeFileSection& d1, const PeFileSection& d2){
 	return d1.sectionHeader.PointerToRawData < d2.sectionHeader.PointerToRawData;
 }
@@ -381,6 +384,12 @@ void* PeTool::SaveToPeBuffer(DWORD *nSize){
 
 	return pOutPe;
 }
+bool PeTool::GetPointerInfo(DWORD64 pointer, PointerInfo* pPointerInfo){
+	if (IsPe32()){
+		;
+	}
+	return false;
+}
 bool PeTool::SaveToPeFileW(wchar_t* szPathFileW){
 	DWORD nSize = 0;
 	PVOID pOutPe = SaveToPeBuffer(&nSize);
@@ -437,4 +446,13 @@ void PeTool::Test()
 	}
 	ExitProcess(0);
 }
-
+void PeTool::Test2()
+{
+	PRunInfo& g_p = g_pRunInfo;
+// 	if (g_p){
+// 		PeTool pe;
+// 		//pe.InitFromNotMapedPeBuffer(pData, nSize);
+// 		;
+// 	}
+	ExitProcess(0);
+}

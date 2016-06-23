@@ -10,15 +10,6 @@
 #include ".\TitanEngine\scylla_wrapper.h"
 #include "PeTool.h"
 
-typedef struct _RunInfo{
-	char JmpCodex86[64];
-	char JmpCodex64[64];
-	int iMoveCount;
-	void* pCopyMemImage = 0;
-	SIZE_T CopyMemImageSize = 0;
-
-}RunInfo, *PRunInfo;
-extern "C" __declspec(dllexport) PRunInfo g_pRunInfo = 0;
 void LoadTest()
 {
 	char szModuleName[0x1100] = "G:\\dev_code\\metape_data\\netpass-x64\\netpass.exe";
@@ -32,18 +23,16 @@ void LoadTest()
 extern "C" __declspec(dllexport) int WINAPI Run(LPVOID lpMemExeAddr);
 int _tmain(int argc, _TCHAR* argv[])
 {
+	/*  -- for Netpass
 	Run((LPVOID)0x00000001);
 	return 0;
 	LoadTest();
 	return 0;
+	*/
 	LogA("in _tmain ");
-// 	LogA("what:%d,%s", 25, "fk a");
-// 	LogW(L"what:%d,%s", 25, L"fk w");
-	MessageBoxA(0, "ssssssssss", "", MB_OK);
-	return 0;
-
 	PeTool pe;
-	pe.Test();
+	//pe.Test();
+	pe.Test2();
 	MessageBoxA(0, "ssssssssss", "", MB_OK);
 	return 0;
 
@@ -92,18 +81,20 @@ void* MoveMemImageToNew(void* ImageBase)
 
 #pragma comment(linker,"/subsystem:\"Windows\" /entry:\"mainCRTStartup\"")
 
+#define  COPY_NOT_JUMP
 extern "C" {
 	__declspec(dllexport) int origin_main(void)
 	{
-// 		LogA("what:%d,%s", 25, "fk a");
-// 		LogW(L"what:%d,%s", 25, L"fk a");
-
-		return _tmainCRTStartup();
 		PRunInfo& g_p = g_pRunInfo;
+#ifdef COPY_NOT_JUMP
+		void *pTmp = MoveMemImageToNew(&__ImageBase);// g_p assign after this to keep copy clean
+		g_p = (PRunInfo)VirtualAlloc(NULL, sizeof(RunInfo), MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+		g_p->pCopyMemImage = pTmp;
+#endif
 		if (g_p){// run from the copy code
 			return _tmainCRTStartup();
 		}
-		else{// first run load by sys
+		else{// first run load by sys (if not define COPY_NOT_JUMP)
 			char *pRetOnStack = (char*)_AddressOfReturnAddress();
 			void *pTmp = MoveMemImageToNew(&__ImageBase);// g_p assign after this to keep copy clean
 			g_p = (PRunInfo)VirtualAlloc(NULL, sizeof(RunInfo), MEM_COMMIT, PAGE_EXECUTE_READWRITE);
