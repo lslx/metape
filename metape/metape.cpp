@@ -32,7 +32,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	LogA("in _tmain ");
 	PeTool pe;
 	//pe.Test();
-	pe.Test2();
+	//pe.Test2();
+	pe.Test3();
 	MessageBoxA(0, "ssssssssss", "", MB_OK);
 	return 0;
 
@@ -79,7 +80,7 @@ void* MoveMemImageToNew(void* ImageBase)
 	return pTmp;
 }
 
-#pragma comment(linker,"/subsystem:\"Windows\" /entry:\"mainCRTStartup\"")
+#pragma comment(linker,"/subsystem:\"Windows\" /entry:\"origin_main\"")//mainCRTStartup
 
 #define  COPY_NOT_JUMP
 extern "C" {

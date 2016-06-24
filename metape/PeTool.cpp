@@ -164,7 +164,8 @@ void Report_NtHeader64(IMAGE_NT_HEADERS64 *pNtHeader64){
 			poh.DataDirectory[i].Size);
 	}
 }
-bool PeTool::InitFromNotMapedPeBuffer(void *pData, DWORD nSize){
+// to do: add alloc failed process 
+bool PeTool::InitFromPeBuffer(bool bHasMaped, void *pData, DWORD nSize){
 	unsigned char* pReadPtr = (unsigned char*)pData;
 	//bool bLog = true;
 	LogA("Init From not Maped Pe Buffer Begin");
@@ -200,6 +201,7 @@ bool PeTool::InitFromNotMapedPeBuffer(void *pData, DWORD nSize){
 	}
 	else{
 		LogA("Error: Nt Header Magic not support 0x%x", pNTHeader32Tmp->OptionalHeader.Magic);
+		ClearAll(false);
 		return false;
 	}
 	pReadPtr += _dwNtHeaderSize;
@@ -210,17 +212,27 @@ bool PeTool::InitFromNotMapedPeBuffer(void *pData, DWORD nSize){
 		nSection = _pNTHeader32->FileHeader.NumberOfSections;
 	else nSection = _pNTHeader64->FileHeader.NumberOfSections;
 	LogA("First image section at : 0x%p number : %d", pSectionHeader, nSection);
-	//get File Align Gap, the vector first maybe not the first in the memory ,so use loop
-	DWORD firstRawOffset = 0;// GetFileAlign();
+	//get File Align Gap, the first item maybe not the first in the memory ,so use loop
+	DWORD firstOffset = 0;// GetFileAlign();
 	for (WORD i = 0; i < nSection; i++){
-		if (pSectionHeader[i].PointerToRawData){//maybe zero (e.g.  .textbss )
-			if (!firstRawOffset)
-				firstRawOffset = pSectionHeader[i].PointerToRawData;
-			else if (pSectionHeader[i].PointerToRawData < firstRawOffset)
-				firstRawOffset = pSectionHeader[i].PointerToRawData;
+		if (!bHasMaped){
+			if (pSectionHeader[i].PointerToRawData){//maybe zero (e.g.  .textbss )
+				if (!firstOffset)
+					firstOffset = pSectionHeader[i].PointerToRawData;
+				else if (pSectionHeader[i].PointerToRawData < firstOffset)
+					firstOffset = pSectionHeader[i].PointerToRawData;
+			}
+		}
+		else{
+			if (pSectionHeader[i].VirtualAddress){
+				if (!firstOffset)
+					firstOffset = pSectionHeader[i].VirtualAddress;
+				else if (pSectionHeader[i].VirtualAddress < firstOffset)
+					firstOffset = pSectionHeader[i].VirtualAddress;
+			}
 		}
 	}
-	_dwAlignGapLen = firstRawOffset - ((char*)&pSectionHeader[nSection] - pData);
+	_dwAlignGapLen = firstOffset - ((char*)&pSectionHeader[nSection] - pData);
 	if (_dwAlignGapLen){
 		_pAlignGap = (BYTE*)LocalAlloc(LPTR, _dwAlignGapLen);;
 		memcpy_s(_pAlignGap, _dwAlignGapLen,
@@ -234,9 +246,10 @@ bool PeTool::InitFromNotMapedPeBuffer(void *pData, DWORD nSize){
 		PeFileSection peFileSection;
 		memcpy_s(&peFileSection.sectionHeader, sizeof(IMAGE_SECTION_HEADER), pSectionHeader,sizeof(IMAGE_SECTION_HEADER));
 		peFileSection.dataSize = pSectionHeader->SizeOfRawData;
-		if (pSectionHeader->SizeOfRawData){
+		if (pSectionHeader->SizeOfRawData){//bug bug fix me
 			peFileSection.data = (BYTE*)LocalAlloc(LPTR, peFileSection.dataSize);
-			memcpy_s(peFileSection.data, peFileSection.dataSize, (unsigned char*)pData + pSectionHeader->PointerToRawData, peFileSection.dataSize);
+			DWORD dwDataOffset = bHasMaped?pSectionHeader->VirtualAddress:pSectionHeader->PointerToRawData;
+			memcpy_s(peFileSection.data, peFileSection.dataSize, (unsigned char*)pData + dwDataOffset, peFileSection.dataSize);
 		}
 		_listPeSection.push_back(peFileSection);
 		pSectionHeader++;
@@ -250,23 +263,24 @@ bool PeTool::InitFromNotMapedPeBuffer(void *pData, DWORD nSize){
 	}
 	std::sort(listPeSectionSort.begin(), listPeSectionSort.end(), SortByPointerToRawData);
 	for (std::vector<PeFileSection>::iterator it = listPeSectionSort.begin(); it != listPeSectionSort.end(); it++){
-
-		DWORD dwCurSectionEnd = (*it).sectionHeader.PointerToRawData + (*it).sectionHeader.SizeOfRawData;
+		DWORD dwCurDataOffset = bHasMaped ? (*it).sectionHeader.VirtualAddress : (*it).sectionHeader.PointerToRawData;
+		DWORD dwCurSectionEnd = dwCurDataOffset + (*it).sectionHeader.SizeOfRawData;
 		DWORD dwNextSectionBegin = 0;
 		if (it + 1 != listPeSectionSort.end()){
-			dwNextSectionBegin = (*(it+1)).sectionHeader.PointerToRawData;
+			dwNextSectionBegin = bHasMaped ? (*(it + 1)).sectionHeader.VirtualAddress : (*(it + 1)).sectionHeader.PointerToRawData;
 		}
 		else{
 			if (IsPe32())
-				dwNextSectionBegin = _pNTHeader32->OptionalHeader.SizeOfImage;
-			else dwNextSectionBegin = _pNTHeader64->OptionalHeader.SizeOfImage;
+				dwNextSectionBegin = bHasMaped ? _pNTHeader32->OptionalHeader.SizeOfImage:nSize;
+			else dwNextSectionBegin = bHasMaped ? _pNTHeader64->OptionalHeader.SizeOfImage:nSize;
 
 		}
 		if (dwNextSectionBegin > dwCurSectionEnd){
 			(*it).dwAlignGapLen = dwNextSectionBegin - dwCurSectionEnd;
 			(*it).pAlignGap = (BYTE*)LocalAlloc(LPTR, (*it).dwAlignGapLen);
-			memcpy_s((*it).pAlignGap, (*it).dwAlignGapLen, (unsigned char*)pData + pSectionHeader->PointerToRawData, (*it).dwAlignGapLen);
-			break;
+			memcpy_s((*it).pAlignGap, (*it).dwAlignGapLen, (unsigned char*)pData + dwCurDataOffset
+				+ (*it).sectionHeader.SizeOfRawData, (*it).dwAlignGapLen);
+			continue;
 		}
 		else{
 			if (it + 1 != listPeSectionSort.end()){
@@ -278,20 +292,25 @@ bool PeTool::InitFromNotMapedPeBuffer(void *pData, DWORD nSize){
 		}
 	}
 
-	//get overlay data, maybe the sections not sort by RawOffset(e.g. Petite), so use the loop
-	DWORD lastRawOffset = 0, lastRawSize = 0;
-	for (std::vector<PeFileSection>::iterator it = _listPeSection.begin(); it != _listPeSection.end(); it++){
-		if (((*it).sectionHeader.PointerToRawData + (*it).sectionHeader.SizeOfRawData) >(lastRawOffset + lastRawSize)){
-			lastRawOffset = (*it).sectionHeader.PointerToRawData;
-			lastRawSize = (*it).sectionHeader.SizeOfRawData;
+	if (!bHasMaped){
+		//get overlay data, maybe the sections not sort by RawOffset(e.g. Petite), so use the loop
+		DWORD lastRawOffset = 0, lastRawSize = 0;
+		for (std::vector<PeFileSection>::iterator it = _listPeSection.begin(); it != _listPeSection.end(); it++){
+			if (((*it).sectionHeader.PointerToRawData + (*it).sectionHeader.SizeOfRawData) >(lastRawOffset + lastRawSize)){
+				lastRawOffset = (*it).sectionHeader.PointerToRawData;
+				lastRawSize = (*it).sectionHeader.SizeOfRawData;
+			}
+		}
+		DWORD _dwOverlaySize = nSize - (lastRawSize + lastRawOffset);
+		if (_dwOverlaySize){// if has overlay data
+			_pOverlayData = (BYTE*)LocalAlloc(LPTR, _dwOverlaySize);
+			memcpy_s(_pOverlayData, _dwOverlaySize,
+				(char*)pData + lastRawOffset + lastRawSize, _dwOverlaySize);
 		}
 	}
-	DWORD _dwOverlaySize = nSize - (lastRawSize + lastRawOffset);
-	if (_dwOverlaySize){// if has overlay data
-		_pOverlayData = (BYTE*)LocalAlloc(LPTR, _dwOverlaySize);
-		memcpy_s(_pOverlayData, _dwOverlaySize,
-			(char*)pData + lastRawOffset + lastRawSize, _dwAlignGapLen);
-	}
+	if (bHasMaped)
+		_eStatus = eMaped;
+	else _eStatus = eNotMaped;
 	return true;
 }
 bool PeTool::InitFromPeFileW(wchar_t* szPathFileW){
@@ -299,7 +318,7 @@ bool PeTool::InitFromPeFileW(wchar_t* szPathFileW){
 	unsigned char* pData = (unsigned char*)File2BufferW(&nSize, szPathFileW);
 	if (!pData)
 		return false;
-	return InitFromNotMapedPeBuffer(pData, nSize);
+	return InitFromPeBuffer(false,pData, nSize);
 }
 bool PeTool::InitFromPeFile(char* szPathFile){
 	WCHAR szPathFileW[MAX_PATH] = { 0 };
@@ -321,10 +340,11 @@ DWORD PeTool::CalcSizeByPeContent()
 		nNeedSize += (*it).dataSize;
 		nNeedSize += (*it).dwAlignGapLen;
 	}
-	nNeedSize += _dwOverlaySize;
+	if (eNotMaped == _eStatus)
+		nNeedSize += _dwOverlaySize;
 	return nNeedSize;
 }
-void* PeTool::SaveToPeBuffer(DWORD *nSize){
+char* PeTool::SaveToPeBuffer(DWORD *nSize){
 	DWORD nLeftSize = CalcSizeByPeContent();
 	*nSize = nLeftSize;
 	BYTE* pOutPe = (BYTE*)LocalAlloc(LPTR, nLeftSize);
@@ -375,14 +395,15 @@ void* PeTool::SaveToPeBuffer(DWORD *nSize){
 		pWritePtr += (*it).dwAlignGapLen;
 		nLeftSize -= (*it).dwAlignGapLen;
 	}
-	//write overlay data
-	if (_pOverlayData){
-		memcpy_s(pWritePtr, nLeftSize, _pOverlayData, _dwOverlaySize);
-		pWritePtr += _dwOverlaySize;
-		nLeftSize -= _dwOverlaySize;
+	if (eNotMaped == _eStatus){
+		//write overlay data
+		if (_pOverlayData){
+			memcpy_s(pWritePtr, nLeftSize, _pOverlayData, _dwOverlaySize);
+			pWritePtr += _dwOverlaySize;
+			nLeftSize -= _dwOverlaySize;
+		}
 	}
-
-	return pOutPe;
+	return (char*)pOutPe;
 }
 bool PeTool::GetPointerInfo(DWORD64 pointer, PointerInfo* pPointerInfo){
 	if (IsPe32()){
@@ -437,7 +458,7 @@ void PeTool::Test()
 		DWORD nSize;
 		char* pData = (char*)File2Buffer(&nSize, szModuleName);
 		PeTool pe;
-		pe.InitFromNotMapedPeBuffer(pData, nSize);
+		pe.InitFromPeBuffer(false,pData, nSize);
 		char szModuleNameSave[0x1100] = { 0 };
 		strcpy(szModuleNameSave, szModuleName);
 		strcat(szModuleNameSave, ".save.exe");
@@ -446,13 +467,99 @@ void PeTool::Test()
 	}
 	ExitProcess(0);
 }
+char* PeTool::GetOverlayData(DWORD *pnSize){
+	if (!_pOverlayData || !_dwOverlaySize){
+		*pnSize = 0;
+		return NULL;
+	}
+	char* pData = (char*)LocalAlloc(LPTR, _dwOverlaySize);
+	if (pData){
+		memcpy(_pOverlayData, pData, _dwOverlaySize);
+		*pnSize = _dwOverlaySize;
+		return pData;
+	}
+	*pnSize = 0;
+	return NULL;
+}
+bool PeTool::SetOverlayData(char* pData, DWORD nSize){
+	if (!pData || !nSize)
+		return false;
+	LPVOID pTmp = LocalAlloc(LPTR, nSize);
+	if (pTmp){
+		if (_pOverlayData)
+			LocalFree(_pOverlayData);
+		_pOverlayData = (BYTE*)pTmp;
+		_dwOverlaySize = nSize;
+		memcpy(_pOverlayData, pData,_dwOverlaySize);
+		return true;
+	}
+	return false;
+}
+bool PeTool::AddToOverlayData(char* pData, DWORD nSize){
+	if (!pData || !nSize)
+		return false;
+	BYTE* pTmp = NULL;
+	pTmp = (BYTE*)LocalAlloc(LPTR, _dwOverlaySize + nSize);
+	if (pTmp){
+		if (_pOverlayData && _dwOverlaySize){
+			memcpy(pTmp, _pOverlayData, _dwOverlaySize);
+		}
+		memcpy(pTmp + _dwOverlaySize, pData, nSize);
+		if (_pOverlayData)
+			LocalFree(_pOverlayData);
+		_pOverlayData = pTmp;
+		_dwOverlaySize = _dwOverlaySize + nSize;
+		return true;
+	}
+	return false;
+}
+void PeTool::DeleteOverlayData(){
+	if (_pOverlayData)
+		LocalFree(_pOverlayData);
+	_pOverlayData = NULL;
+	_dwOverlaySize = 0;
+}
 void PeTool::Test2()
 {
 	PRunInfo& g_p = g_pRunInfo;
-// 	if (g_p){
-// 		PeTool pe;
-// 		//pe.InitFromNotMapedPeBuffer(pData, nSize);
-// 		;
-// 	}
+	if (g_p){
+		char szModuleName[0x1100] = { 0 };
+		if (GetModuleFileNameA(GetModuleHandleA(NULL), (LPCH)szModuleName, sizeof(szModuleName)-0x100))
+		{
+			DWORD nSize;
+			char* pData = (char*)File2Buffer(&nSize, szModuleName);
+			PeTool pe;
+			pe.InitFromPeBuffer(false, pData, nSize);
+			char myOverLayData[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+			if (pe.SetOverlayData(myOverLayData, 8)){
+				char szModuleNameSave[0x1100] = { 0 };
+				strcpy(szModuleNameSave, szModuleName);
+				strcat(szModuleNameSave, ".save.exe");
+				pe.SaveToPeFile(szModuleNameSave);
+				Test_CompareFile(szModuleName, szModuleNameSave);
+				return;
+
+			}
+
+		}
+	}
+	ExitProcess(0);
+}
+void PeTool::Test3()
+{
+	PRunInfo& g_p = g_pRunInfo;
+	if (g_p){
+		if (g_p->pCopyMemImage){
+			PeTool pe;
+			if (pe.InitFromMapedPeBuffer(g_p->pCopyMemImage)){
+				DWORD nSize = 0;
+				void* pData = pe.SaveToPeBuffer(&nSize);
+				if (pData){
+					Test_CompareBuffer((char*)g_p->pCopyMemImage, nSize, (char*)pData, nSize);
+					return ;
+				}
+			}
+		}
+	}
 	ExitProcess(0);
 }

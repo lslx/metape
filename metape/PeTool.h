@@ -64,8 +64,7 @@ public:
 	DWORD dataSize;
 	BYTE* pAlignGap;
 	DWORD dwAlignGapLen;
-
-	DWORD normalSize;
+	//DWORD normalSize;
 
 	PeFileSection()
 	{
@@ -74,8 +73,7 @@ public:
 		dataSize = 0;
 		pAlignGap = 0;
 		dwAlignGapLen = 0;
-
-		normalSize = 0;
+		//normalSize = 0;
 	}
 };
 enum E_PeStatus{
@@ -87,27 +85,24 @@ class PeTool
 {
 public:
 	PeTool(){
-		_pDosHeader = 0;
-		_pDosStub = 0;
-		_dwDosStubSize = 0;
-		_pNTHeader32 = 0;
-		_pNTHeader64 = 0;
-		_dwNtHeaderSize = 0;
-		_pAlignGap = 0;
-		_dwAlignGapLen = 0;
-		_pOverlayData = 0;
-		_dwOverlaySize = 0;
-		_eStatus = eNoData;
-
+		ClearAll(true);
 	};
 	~PeTool(){};
+	//chge pe 
+	char* PeTool::GetOverlayData(DWORD *pnSize);
+	bool SetOverlayData(char* pData, DWORD nSize);
+	bool AddToOverlayData(char* pData, DWORD nSize);
+	void DeleteOverlayData();
+
 	void Test();
 	void Test2();
+	void Test3();
 	bool InitFromPeFileW(wchar_t* szPathFile);
 	bool InitFromPeFile(char* szPathFile);
-	bool InitFromNotMapedPeBuffer(void *pData, DWORD nSize);
+	bool InitFromMapedPeBuffer(void *pData){ return InitFromPeBuffer(true, pData, 0); };
+	bool InitFromNotMapedPeBuffer(void *pData, DWORD nSize){ return InitFromPeBuffer(false, pData, nSize); };
 
-	void* SaveToPeBuffer(DWORD *nSize);
+	char* SaveToPeBuffer(DWORD *nSize);
 	bool SaveToPeFileW(wchar_t* szPathFileW);
 	bool SaveToPeFile(char* szPathFile);
 	DWORD CalcSizeByPeContent();
@@ -126,8 +121,11 @@ public:
 	}
 	bool GetPointerInfo(DWORD64 pointer, PointerInfo* pPointerInfo);
 private:
-	E_PeStatus _eStatus;
+	//if bHasMaped is true , nSize will be ignore
+	bool InitFromPeBuffer(bool bHasMaped, void *pData, DWORD nSize);
 
+private:
+	E_PeStatus _eStatus;
 private:
 	PIMAGE_DOS_HEADER _pDosHeader;
 	BYTE * _pDosStub; //between dos header and section header
@@ -136,10 +134,27 @@ private:
 	PIMAGE_NT_HEADERS64 _pNTHeader64;
 	DWORD _dwNtHeaderSize;
 	std::vector<PeFileSection> _listPeSection;
-	BYTE* _pAlignGap;
+	BYTE* _pAlignGap;//between header and first section
 	DWORD _dwAlignGapLen;
-	BYTE * _pOverlayData;
+	BYTE * _pOverlayData;//between last section end and file end
 	DWORD _dwOverlaySize;
+
+private:
+	void ClearAll(bool bInit){
+		_eStatus = eNoData;
+		if (!bInit && _pDosHeader)LocalFree(_pDosHeader);	/*if end*/ _pDosHeader = NULL;
+		if (!bInit && _pDosStub)LocalFree(_pDosStub);		/*if end*/ _pDosStub = NULL;       _dwDosStubSize = 0;
+		if (!bInit && _pNTHeader32)LocalFree(_pNTHeader32); /*if end*/ _pNTHeader32 = NULL;    
+		if (!bInit && _pNTHeader64)LocalFree(_pNTHeader64); /*if end*/ _pNTHeader64 = NULL;    _dwNtHeaderSize = 0;
+		if (!bInit){
+			for (std::vector<PeFileSection>::iterator it = _listPeSection.begin(); it != _listPeSection.end();it++){
+				if (it->data) LocalFree(it->data);          /*if end*/it->data = NULL; it->dataSize = 0;
+				if (it->pAlignGap) LocalFree(it->pAlignGap);/*if end*/it->pAlignGap = NULL; it->dwAlignGapLen = 0;
+			}
+		}
+		if (!bInit && _pAlignGap)LocalFree(_pAlignGap);      /*if end*/ _pAlignGap = NULL;      _dwAlignGapLen = 0;
+		if (!bInit && _pOverlayData)LocalFree(_pOverlayData);/*if end*/ _pOverlayData = NULL;   _dwOverlaySize = 0;
+	}
 
 };
 
