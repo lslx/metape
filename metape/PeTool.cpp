@@ -232,7 +232,7 @@ bool PeTool::InitFromPeBuffer(bool bHasMaped, void *pData, DWORD nSize){
 			}
 		}
 	}
-	_dwAlignGapLen = firstOffset - ((char*)&pSectionHeader[nSection] - pData);
+	_dwAlignGapLen = firstOffset - ((char*)&pSectionHeader[nSection] - pData);//use nSection but nSection-1
 	if (_dwAlignGapLen){
 		_pAlignGap = (BYTE*)LocalAlloc(LPTR, _dwAlignGapLen);;
 		memcpy_s(_pAlignGap, _dwAlignGapLen,
@@ -245,11 +245,44 @@ bool PeTool::InitFromPeBuffer(bool bHasMaped, void *pData, DWORD nSize){
 	for (WORD i = 0; i < nSection; i++){
 		PeFileSection peFileSection;
 		memcpy_s(&peFileSection.sectionHeader, sizeof(IMAGE_SECTION_HEADER), pSectionHeader,sizeof(IMAGE_SECTION_HEADER));
-		peFileSection.dataSize = pSectionHeader->SizeOfRawData;
-		if (pSectionHeader->SizeOfRawData){//bug bug fix me
-			peFileSection.data = (BYTE*)LocalAlloc(LPTR, peFileSection.dataSize);
-			DWORD dwDataOffset = bHasMaped?pSectionHeader->VirtualAddress:pSectionHeader->PointerToRawData;
-			memcpy_s(peFileSection.data, peFileSection.dataSize, (unsigned char*)pData + dwDataOffset, peFileSection.dataSize);
+		if (bHasMaped){
+			// if pe has maped, the information of Misc.VirtualSize had lost,
+			// dwSizeOfData will not include uninitialized data
+			DWORD dwSizeOfData = pSectionHeader->SizeOfRawData;
+			// when bHasMaped is true , dwSizeOfData maybe zero, if(...) condition has bug , fix me
+			if (dwSizeOfData && pSectionHeader->VirtualAddress){//maybe VirtualAddress point MZ(is zero),fix me
+				peFileSection.dataSize = dwSizeOfData;
+				peFileSection.data = (BYTE*)LocalAlloc(LPTR, peFileSection.dataSize);
+				memcpy_s(peFileSection.data, peFileSection.dataSize, (unsigned char*)pData + pSectionHeader->VirtualAddress, peFileSection.dataSize);
+			}
+			else{//what the fuck condition
+				LogA("Error: section header data is invalid dwSizeOfData:0x%x,VirtualAddress:0x%x",
+					dwSizeOfData , pSectionHeader->VirtualAddress);
+				ClearAll(false);
+				return false;
+			}
+		}
+		else{// process not maped pe
+			DWORD dwSizeOfData = pSectionHeader->Misc.VirtualSize;
+			if (pSectionHeader->Misc.VirtualSize > pSectionHeader->SizeOfRawData)
+				dwSizeOfData = pSectionHeader->SizeOfRawData;
+			//maybe PointerToRawData point MZ(is zero),fix me , or no data in not maped pe data
+			if (dwSizeOfData && pSectionHeader->PointerToRawData){
+				peFileSection.dataSize = dwSizeOfData;
+				peFileSection.data = (BYTE*)LocalAlloc(LPTR, peFileSection.dataSize);
+				memcpy_s(peFileSection.data, peFileSection.dataSize, (unsigned char*)pData + pSectionHeader->PointerToRawData, peFileSection.dataSize);
+			}
+			else{//what the fuck condition
+				if (pSectionHeader->PointerToRawData){
+					LogA("Error: section header data is invalid dwSizeOfData:0x%x,PointerToRawData:0x%x",
+						dwSizeOfData, pSectionHeader->PointerToRawData);
+					ClearAll(false);
+					return false;
+				}
+				else{
+					;// maybe should process , fix me
+				}
+			}
 		}
 		_listPeSection.push_back(peFileSection);
 		pSectionHeader++;
@@ -261,36 +294,68 @@ bool PeTool::InitFromPeBuffer(bool bHasMaped, void *pData, DWORD nSize){
 		if ((*it).data)
 			listPeSectionSort.push_back(*it);
 	}
-	std::sort(listPeSectionSort.begin(), listPeSectionSort.end(), SortByPointerToRawData);
-	for (std::vector<PeFileSection>::iterator it = listPeSectionSort.begin(); it != listPeSectionSort.end(); it++){
-		DWORD dwCurDataOffset = bHasMaped ? (*it).sectionHeader.VirtualAddress : (*it).sectionHeader.PointerToRawData;
-		DWORD dwCurSectionEnd = dwCurDataOffset + (*it).sectionHeader.SizeOfRawData;
-		DWORD dwNextSectionBegin = 0;
-		if (it + 1 != listPeSectionSort.end()){
-			dwNextSectionBegin = bHasMaped ? (*(it + 1)).sectionHeader.VirtualAddress : (*(it + 1)).sectionHeader.PointerToRawData;
+	std::sort(listPeSectionSort.begin(), listPeSectionSort.end(), bHasMaped ? SortByVirtualAddress:SortByPointerToRawData);
+	for (std::vector<PeFileSection>::iterator itSort = listPeSectionSort.begin(); itSort != listPeSectionSort.end(); itSort++){
+		DWORD dwCurDataOffset = bHasMaped ? (*itSort).sectionHeader.VirtualAddress : (*itSort).sectionHeader.PointerToRawData;
+		//warning: when bHasMaped is true, dwCurSectionEnd is not the real end,because uninitialized data len unknown
+		// that can calc by VirtualSize which the information has lost
+		DWORD dwCurDataEnd = 0;
+		if (bHasMaped){
+			dwCurDataEnd = dwCurDataOffset + (*itSort).sectionHeader.SizeOfRawData;
 		}
 		else{
+			dwCurDataEnd = dwCurDataOffset + (*itSort).sectionHeader.Misc.VirtualSize;
+			if ((*itSort).sectionHeader.Misc.VirtualSize > (*itSort).sectionHeader.SizeOfRawData)
+				dwCurDataEnd = dwCurDataOffset + (*itSort).sectionHeader.SizeOfRawData;
+		}
+		DWORD dwNextSectionBegin = 0;
+		if (itSort + 1 != listPeSectionSort.end()){
+			dwNextSectionBegin = bHasMaped ? (*(itSort + 1)).sectionHeader.VirtualAddress : (*(itSort + 1)).sectionHeader.PointerToRawData;
+		}
+		else{
+			//now itSort is the last, don't worry , 
+			//it must be the last in no sort and has all item one (because the push condition)
 			if (IsPe32())
 				dwNextSectionBegin = bHasMaped ? _pNTHeader32->OptionalHeader.SizeOfImage:nSize;
 			else dwNextSectionBegin = bHasMaped ? _pNTHeader64->OptionalHeader.SizeOfImage:nSize;
 
 		}
-		if (dwNextSectionBegin > dwCurSectionEnd){
-			(*it).dwAlignGapLen = dwNextSectionBegin - dwCurSectionEnd;
-			(*it).pAlignGap = (BYTE*)LocalAlloc(LPTR, (*it).dwAlignGapLen);
-			memcpy_s((*it).pAlignGap, (*it).dwAlignGapLen, (unsigned char*)pData + dwCurDataOffset
-				+ (*it).sectionHeader.SizeOfRawData, (*it).dwAlignGapLen);
-			continue;
+		if (dwNextSectionBegin > dwCurDataEnd){
+			(*itSort).dwAlignGapLen = dwNextSectionBegin - dwCurDataEnd;
+			(*itSort).pAlignGap = (BYTE*)LocalAlloc(LPTR, (*itSort).dwAlignGapLen);
+			//warning: when bHasMaped is true, dwAlignGapLen include the uninitialized data
+			memcpy_s((*itSort).pAlignGap, (*itSort).dwAlignGapLen, (unsigned char*)pData
+				+ dwCurDataEnd, (*itSort).dwAlignGapLen);
+		}
+		else if (dwNextSectionBegin == dwCurDataEnd){
+			;// no gap here, do nothing
 		}
 		else{
-			if (it + 1 != listPeSectionSort.end()){
-				;// sections overlay
+			if (itSort + 1 != listPeSectionSort.end()){
+				// sections overwrite
+				LogA("Error: sections overwrite !");
+				ClearAll(false);
+				return false;
 			}
 			else{
-				;//header data has err
+				//section header data has err
+				LogA("Error: section header data has err !");
+				ClearAll(false);
+				return false;
 			}
 		}
 	}
+	// assign to _listPeSection
+	for (std::vector<PeFileSection>::iterator itSort = listPeSectionSort.begin(); itSort != listPeSectionSort.end(); itSort++){
+		for (std::vector<PeFileSection>::iterator it = _listPeSection.begin(); it != _listPeSection.end(); it++){
+			// don't worry when (*it).data is zero, because (*itSort).data always not zero
+			if ((*itSort).data == (*it).data){
+				(*it).pAlignGap = (*itSort).pAlignGap;
+				(*it).dwAlignGapLen = (*itSort).dwAlignGapLen;
+			}
+		}
+	}
+	listPeSectionSort.clear();
 
 	if (!bHasMaped){
 		//get overlay data, maybe the sections not sort by RawOffset(e.g. Petite), so use the loop
@@ -376,7 +441,7 @@ char* PeTool::SaveToPeBuffer(DWORD *nSize){
 		nLeftSize -= sizeof(IMAGE_SECTION_HEADER);
 	}
 
-	//write file align gap
+	//write file or memory page align gap, actually align to the next stuff begin
 	memcpy_s(pWritePtr, nLeftSize, _pAlignGap, _dwAlignGapLen);
 	pWritePtr += _dwAlignGapLen;
 	nLeftSize -= _dwAlignGapLen;
@@ -465,7 +530,6 @@ void PeTool::Test()
 		pe.SaveToPeFile(szModuleNameSave);
 		Test_CompareFile(szModuleName, szModuleNameSave);
 	}
-	ExitProcess(0);
 }
 char* PeTool::GetOverlayData(DWORD *pnSize){
 	if (!_pOverlayData || !_dwOverlaySize){
@@ -543,7 +607,6 @@ void PeTool::Test2()
 
 		}
 	}
-	ExitProcess(0);
 }
 void PeTool::Test3()
 {

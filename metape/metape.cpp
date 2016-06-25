@@ -31,8 +31,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	*/
 	LogA("in _tmain ");
 	PeTool pe;
-	//pe.Test();
-	//pe.Test2();
+	pe.Test();
+	pe.Test2();
 	pe.Test3();
 	MessageBoxA(0, "ssssssssss", "", MB_OK);
 	return 0;

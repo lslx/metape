@@ -133,7 +133,7 @@ private:
 	PIMAGE_NT_HEADERS32 _pNTHeader32;
 	PIMAGE_NT_HEADERS64 _pNTHeader64;
 	DWORD _dwNtHeaderSize;
-	std::vector<PeFileSection> _listPeSection;
+	std::vector<PeFileSection> _listPeSection;// need multi times init
 	BYTE* _pAlignGap;//between header and first section
 	DWORD _dwAlignGapLen;
 	BYTE * _pOverlayData;//between last section end and file end
@@ -151,6 +151,7 @@ private:
 				if (it->data) LocalFree(it->data);          /*if end*/it->data = NULL; it->dataSize = 0;
 				if (it->pAlignGap) LocalFree(it->pAlignGap);/*if end*/it->pAlignGap = NULL; it->dwAlignGapLen = 0;
 			}
+			_listPeSection.clear();
 		}
 		if (!bInit && _pAlignGap)LocalFree(_pAlignGap);      /*if end*/ _pAlignGap = NULL;      _dwAlignGapLen = 0;
 		if (!bInit && _pOverlayData)LocalFree(_pOverlayData);/*if end*/ _pOverlayData = NULL;   _dwOverlaySize = 0;
