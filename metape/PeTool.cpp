@@ -164,6 +164,50 @@ void Report_NtHeader64(IMAGE_NT_HEADERS64 *pNtHeader64){
 			poh.DataDirectory[i].Size);
 	}
 }
+bool PeTool::ListSection_Init(PIMAGE_SECTION_HEADER pSectionHeader, WORD nSection){
+	if (!pSectionHeader || !nSection)
+		return false;
+	_listPeSection.clear();
+	_listPeSection.reserve(nSection);
+	for (WORD i = 0; i < nSection; i++){
+		PeFileSection peFileSection;
+		memcpy_s(&peFileSection.sectionHeader, sizeof(IMAGE_SECTION_HEADER),
+			pSectionHeader, sizeof(IMAGE_SECTION_HEADER));
+		_listPeSection.push_back(peFileSection);
+		pSectionHeader++;
+	}
+	return true;
+}
+bool PeTool::ListSection_GetTheFirstSectionOffset(bool bHasMaped, DWORD *dwOffset){
+	if (!_listPeSection.size())
+		return false;
+
+	for (std::vector<PeFileSection>::iterator it = _listPeSection.begin(); it != _listPeSection.end(); it++){
+		PIMAGE_SECTION_HEADER pSectionHeader = &(*it).sectionHeader;
+// 		if ((*it).data)
+// 			listPeSectionSort.push_back(*it);
+	}
+
+// 	for (WORD i = 0; i < nSection; i++){
+// 		if (!bHasMaped){
+// 			if (pSectionHeader[i].PointerToRawData){//maybe zero (e.g.  .textbss )
+// 				if (!firstOffset)
+// 					firstOffset = pSectionHeader[i].PointerToRawData;
+// 				else if (pSectionHeader[i].PointerToRawData < firstOffset)
+// 					firstOffset = pSectionHeader[i].PointerToRawData;
+// 			}
+// 		}
+// 		else{
+// 			if (pSectionHeader[i].VirtualAddress){
+// 				if (!firstOffset)
+// 					firstOffset = pSectionHeader[i].VirtualAddress;
+// 				else if (pSectionHeader[i].VirtualAddress < firstOffset)
+// 					firstOffset = pSectionHeader[i].VirtualAddress;
+// 			}
+// 		}
+// 	}
+	return false;
+}
 // to do: add alloc failed process 
 bool PeTool::InitFromPeBuffer(bool bHasMaped, void *pData, DWORD nSize){
 	unsigned char* pReadPtr = (unsigned char*)pData;
@@ -206,38 +250,33 @@ bool PeTool::InitFromPeBuffer(bool bHasMaped, void *pData, DWORD nSize){
 	}
 	pReadPtr += _dwNtHeaderSize;
 
-	PIMAGE_SECTION_HEADER pSectionHeader = IMAGE_FIRST_SECTION(pNTHeader32Tmp);
 	WORD nSection = 0;
 	if (IsPe32())
 		nSection = _pNTHeader32->FileHeader.NumberOfSections;
 	else nSection = _pNTHeader64->FileHeader.NumberOfSections;
+
+	PIMAGE_SECTION_HEADER pSectionHeader = IMAGE_FIRST_SECTION(pNTHeader32Tmp);
 	LogA("First image section at : 0x%p number : %d", pSectionHeader, nSection);
-	//get File Align Gap, the first item maybe not the first in the memory ,so use loop
-	DWORD firstOffset = 0;// GetFileAlign();
-	for (WORD i = 0; i < nSection; i++){
-		if (!bHasMaped){
-			if (pSectionHeader[i].PointerToRawData){//maybe zero (e.g.  .textbss )
-				if (!firstOffset)
-					firstOffset = pSectionHeader[i].PointerToRawData;
-				else if (pSectionHeader[i].PointerToRawData < firstOffset)
-					firstOffset = pSectionHeader[i].PointerToRawData;
-			}
-		}
-		else{
-			if (pSectionHeader[i].VirtualAddress){
-				if (!firstOffset)
-					firstOffset = pSectionHeader[i].VirtualAddress;
-				else if (pSectionHeader[i].VirtualAddress < firstOffset)
-					firstOffset = pSectionHeader[i].VirtualAddress;
-			}
-		}
+
+	//init _listPeSection the first time, just copy headers
+	if (!ListSection_Init(pSectionHeader, nSection)){
+		ClearAll(false);
+		return false;
 	}
-	_dwAlignGapLen = firstOffset - ((char*)&pSectionHeader[nSection] - pData);//use nSection but nSection-1
+
+	//get File Align Gap, the first item maybe not the first in the memory ,so use loop
+	DWORD dwFirstSectionOffset = 0;// GetFileAlign();
+	if (!ListSection_GetTheFirstSectionOffset(bHasMaped, &dwFirstSectionOffset)){
+		ClearAll(false);
+		return false;
+	}
+	_dwAlignGapLen = dwFirstSectionOffset - ((char*)&pSectionHeader[nSection] - pData);//use nSection but nSection-1
 	if (_dwAlignGapLen){
 		_pAlignGap = (BYTE*)LocalAlloc(LPTR, _dwAlignGapLen);;
 		memcpy_s(_pAlignGap, _dwAlignGapLen,
 			&pSectionHeader[nSection], _dwAlignGapLen);
 	}
+	pSectionHeader = 0;// avoid to use it at below
 
 	//get section headers and sections data without the gap data
 	_listPeSection.clear();

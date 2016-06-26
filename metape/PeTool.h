@@ -88,6 +88,10 @@ public:
 		ClearAll(true);
 	};
 	~PeTool(){};
+	// sections op
+	bool ListSection_Init(PIMAGE_SECTION_HEADER pSectionHeader, WORD nSection);
+	bool ListSection_GetTheFirstSectionOffset(bool bHasMaped, DWORD *dwOffset);
+
 	//chge pe 
 	char* PeTool::GetOverlayData(DWORD *pnSize);
 	bool SetOverlayData(char* pData, DWORD nSize);
