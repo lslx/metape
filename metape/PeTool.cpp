@@ -182,10 +182,15 @@ bool PeTool::ListSection_GetTheFirstSectionOffset(bool bHasMaped, DWORD *dwOffse
 	if (!_listPeSection.size())
 		return false;
 
-	for (std::vector<PeFileSection>::iterator it = _listPeSection.begin(); it != _listPeSection.end(); it++){
+	std::vector<PeFileSection> listPeSectionSort;
+	std::sort(listPeSectionSort.begin(), listPeSectionSort.end(), bHasMaped ? SortByVirtualAddress : SortByPointerToRawData);
+
+
+	for (std::vector<PeFileSection>::iterator it = listPeSectionSort.begin(); it != listPeSectionSort.end(); it++){
 		PIMAGE_SECTION_HEADER pSectionHeader = &(*it).sectionHeader;
-// 		if ((*it).data)
-// 			listPeSectionSort.push_back(*it);
+		pSectionHeader->PointerToRawData;
+		pSectionHeader->VirtualAddress;
+
 	}
 
 // 	for (WORD i = 0; i < nSection; i++){

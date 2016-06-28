@@ -2,6 +2,7 @@
 #define __PE_TOOL_H____h_
 #include <windows.h>
 #include <vector>
+#include <list>
 
 #define ALIGN_VALUE_UP(value, alignment)    (((value) + (alignment) - 1) & ~((alignment) - 1))
 enum E_DataType{
@@ -40,6 +41,30 @@ enum E_DataUsageType{
 	euDelayImport,
 	euComDescriptor,
 };
+enum E_EntityType{
+	euNoType,
+	euDosHeader,
+	euDosStub,
+	euNtHeader,
+};
+enum E_PointTo{
+	eptBegin,
+	eptContent,
+	eptEnd,
+};
+typedef struct _NodeInfo
+{
+	E_EntityType eType;
+	E_PointTo eptType;
+}NodeInfo, *PNodeInfo;
+typedef struct _NodeInfo
+{
+	E_EntityType eType;
+	std::list<NodeInfo> listNodeInfo;
+}NodeInfo, *PNodeInfo;
+
+
+
 typedef struct _PointerInfo{
 	E_DataType eDataType;
 	E_DataUsageType eDataUsageType;
