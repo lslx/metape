@@ -17,60 +17,76 @@ enum E_DataType{
 	eSectionGap,
 	eOverLay,
 };
-enum E_DataUsageType{
-	euNoType,
-	euDosHeader,
-	euDosStub,
-	euNtHeader,
-	euNtHeaderGap,
-	euSectionHeader,
-	euSectionHeaderGap,
-	euExportTable,
-	euImportTable,
-	euResourcesTable,
-	euExceptionTable,
-	euSecurityTable,
-	euBaseRelocationTable,
-	euDebug,
-	euCopyright,
-	euGlobalPtr,
-	euThreadLocalStorage,
-	euLoadConfig,
-	euBoundImport,
-	euImportAddressTable,
-	euDelayImport,
-	euComDescriptor,
-};
+// enum E_DataUsageType{
+// 	euNoType,
+// 	euDosHeader,
+// 	euDosStub,
+// 	euNtHeader,
+// 	euNtHeaderGap,
+// 	euSectionHeader,
+// 	euSectionHeaderGap,
+// 	euExportTable,
+// 	euImportTable,
+// 	euResourcesTable,
+// 	euExceptionTable,
+// 	euSecurityTable,
+// 	euBaseRelocationTable,
+// 	euDebug,
+// 	euCopyright,
+// 	euGlobalPtr,
+// 	euThreadLocalStorage,
+// 	euLoadConfig,
+// 	euBoundImport,
+// 	euImportAddressTable,
+// 	euDelayImport,
+// 	euComDescriptor,
+// };
 enum E_EntityType{
-	euNoType,
+	euAllBuffer,
 	euDosHeader,
 	euDosStub,
 	euNtHeader,
+	euSectionHeader,
+	euSection,
+	euOverLay,
+	euNoType = -1,
 };
 enum E_PointTo{
 	eptBegin,
 	eptContent,
 	eptEnd,
+	eptNoType = -1,
 };
-typedef struct _NodeInfo
+typedef struct _AddrInfo
 {
+	DWORD Addr;
+	DWORD dwIndex;
 	E_EntityType eType;
 	E_PointTo eptType;
-}NodeInfo, *PNodeInfo;
+	_AddrInfo(){
+		Reset();
+	}
+	void Reset(){
+		Addr = -1;
+		dwIndex = -1;
+		eType = euNoType;
+		eptType = eptNoType;
+	}
+}AddrInfo, *PAddrInfo;
 typedef struct _NodeInfo
 {
-	E_EntityType eType;
-	std::list<NodeInfo> listNodeInfo;
+	DWORD Addr;
+	std::list<AddrInfo> listAddrInfo;
 }NodeInfo, *PNodeInfo;
+typedef std::list<NodeInfo> ListNodeInfo;
 
 
-
-typedef struct _PointerInfo{
-	E_DataType eDataType;
-	E_DataUsageType eDataUsageType;
-	DWORD dwOffsetOfNotMaped;
-	DWORD dwOffsetOfMaped;
-}PointerInfo, *PPointerInfo;
+// typedef struct _PointerInfo{
+// 	E_DataType eDataType;
+// 	E_DataUsageType eDataUsageType;
+// 	DWORD dwOffsetOfNotMaped;
+// 	DWORD dwOffsetOfMaped;
+// }PointerInfo, *PPointerInfo;
 typedef struct _RunInfo{
 	char JmpCodex86[64];
 	char JmpCodex64[64];
@@ -87,8 +103,6 @@ public:
 	IMAGE_SECTION_HEADER sectionHeader;
 	BYTE * data;
 	DWORD dataSize;
-	BYTE* pAlignGap;
-	DWORD dwAlignGapLen;
 	//DWORD normalSize;
 
 	PeFileSection()
@@ -96,8 +110,6 @@ public:
 		ZeroMemory(&sectionHeader, sizeof(IMAGE_SECTION_HEADER));
 		data = 0;
 		dataSize = 0;
-		pAlignGap = 0;
-		dwAlignGapLen = 0;
 		//normalSize = 0;
 	}
 };
@@ -126,11 +138,13 @@ public:
 	void Test();
 	void Test2();
 	void Test3();
+	void Test4();
 	bool InitFromPeFileW(wchar_t* szPathFile);
 	bool InitFromPeFile(char* szPathFile);
 	bool InitFromMapedPeBuffer(void *pData){ return InitFromPeBuffer(true, pData, 0); };
 	bool InitFromNotMapedPeBuffer(void *pData, DWORD nSize){ return InitFromPeBuffer(false, pData, nSize); };
-
+	bool FixMapedPeSectionsEndAddrInfo();
+	bool CheckAddrListValid();
 	char* SaveToPeBuffer(DWORD *nSize);
 	bool SaveToPeFileW(wchar_t* szPathFileW);
 	bool SaveToPeFile(char* szPathFile);
@@ -148,10 +162,17 @@ public:
 			return _pNTHeader32->OptionalHeader.SectionAlignment;
 		else return _pNTHeader32->OptionalHeader.SectionAlignment;
 	}
-	bool GetPointerInfo(DWORD64 pointer, PointerInfo* pPointerInfo);
+	//bool GetPointerInfo(DWORD64 pointer, PointerInfo* pPointerInfo);
+private:
+	ListNodeInfo _listNodeInfo;
 private:
 	//if bHasMaped is true , nSize will be ignore
 	bool InitFromPeBuffer(bool bHasMaped, void *pData, DWORD nSize);
+	bool AddAddrInfo(PAddrInfo pAddrInfo);
+	bool InitAddrInfoFromPeBuffer(bool bHasMaped, void *pData, DWORD nSize);
+	bool GetDataAddrInfo(E_EntityType eType, DWORD *pdwBengin, DWORD *pdwEnd, DWORD dwIndex = 0);
+	bool GetSectionCountByAddrInfo(DWORD *pdwNum);
+
 
 private:
 	E_PeStatus _eStatus;
@@ -163,8 +184,6 @@ private:
 	PIMAGE_NT_HEADERS64 _pNTHeader64;
 	DWORD _dwNtHeaderSize;
 	std::vector<PeFileSection> _listPeSection;// need multi times init
-	BYTE* _pAlignGap;//between header and first section
-	DWORD _dwAlignGapLen;
 	BYTE * _pOverlayData;//between last section end and file end
 	DWORD _dwOverlaySize;
 
@@ -178,11 +197,9 @@ private:
 		if (!bInit){
 			for (std::vector<PeFileSection>::iterator it = _listPeSection.begin(); it != _listPeSection.end();it++){
 				if (it->data) LocalFree(it->data);          /*if end*/it->data = NULL; it->dataSize = 0;
-				if (it->pAlignGap) LocalFree(it->pAlignGap);/*if end*/it->pAlignGap = NULL; it->dwAlignGapLen = 0;
 			}
 			_listPeSection.clear();
 		}
-		if (!bInit && _pAlignGap)LocalFree(_pAlignGap);      /*if end*/ _pAlignGap = NULL;      _dwAlignGapLen = 0;
 		if (!bInit && _pOverlayData)LocalFree(_pOverlayData);/*if end*/ _pOverlayData = NULL;   _dwOverlaySize = 0;
 	}
 
