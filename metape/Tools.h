@@ -91,4 +91,5 @@ bool ChgeMapedExe2Dll(PVOID pMapedMemData);
 bool ChgeMapedDll2Exe(PVOID pMapedMemData);
 void HexDump(char * in, int len);
 
+PBYTE SkipJumps(PBYTE pbCode);
 #endif //__TOOLS_H____h_

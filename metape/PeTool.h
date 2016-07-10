@@ -139,6 +139,8 @@ public:
 	void Test2();
 	void Test3();
 	void Test4();
+	void Test5();
+	void Test6();
 	bool InitFromPeFileW(wchar_t* szPathFile);
 	bool InitFromPeFile(char* szPathFile);
 	bool InitFromMapedPeBuffer(void *pData){ return InitFromPeBuffer(true, pData, 0); };

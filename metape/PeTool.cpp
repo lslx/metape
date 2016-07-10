@@ -1,3 +1,5 @@
+#include "ReflectiveLoader.h"
+
 #include "PeTool.h"
 #include "Tools.h"
 #include <algorithm>
@@ -846,4 +848,448 @@ void PeTool::Test4()
 		}
 	}
 	ExitProcess(0);
+}
+void PeTool::Test5()
+{
+	IMAGE_DOS_HEADER dos;
+	dos.e_magic = IMAGE_DOS_SIGNATURE;
+	dos.e_cblp = 0x0090;
+	dos.e_cp = 0x0003;
+	dos.e_crlc = 0x0000;
+	dos.e_cparhdr = 0x0004;
+	dos.e_minalloc = 0x0000;
+	dos.e_maxalloc = 0xffff;
+	dos.e_ss = 0x0000;
+	dos.e_sp = 0x00b8;
+	dos.e_csum = 0x0000;
+	dos.e_ip = 0x0000;
+	dos.e_cs = 0x0000;
+	dos.e_lfarlc = 0x0040;
+	dos.e_ovno = 0x0000;
+	dos.e_res[4] = {0};
+	dos.e_oemid = 0x0000;
+	dos.e_oeminfo = 0x0000;
+	dos.e_res2[10] = {0};
+	dos.e_lfanew = 0x00000108;
+	IMAGE_NT_HEADERS32 nt;
+	nt.Signature = IMAGE_NT_SIGNATURE;
+	nt.FileHeader.Machine = 0x014c;
+	nt.FileHeader.NumberOfSections = 0x0007;
+	nt.FileHeader.TimeDateStamp = 0x57818ce7;
+	nt.FileHeader.PointerToSymbolTable = 0x00000000;
+	nt.FileHeader.NumberOfSymbols = 0x00000000;
+	nt.FileHeader.SizeOfOptionalHeader = 0x00e0;
+	nt.FileHeader.Characteristics = 0x0102;
+	// Standard fields.
+	nt.OptionalHeader.Magic = 0x010b;
+	nt.OptionalHeader.MajorLinkerVersion = 0x0c;
+	nt.OptionalHeader.MinorLinkerVersion = 0x00;
+	nt.OptionalHeader.SizeOfCode = 0x00257e00;
+	nt.OptionalHeader.SizeOfInitializedData = 0x00086800;
+	nt.OptionalHeader.SizeOfUninitializedData = 0x00000000;
+	nt.OptionalHeader.AddressOfEntryPoint = 0x0011f195;
+	nt.OptionalHeader.BaseOfCode = 0x00001000;
+	nt.OptionalHeader.BaseOfData = 0x00001000;
+	// NT additional fields.
+	nt.OptionalHeader.ImageBase = 0x00850000;
+	nt.OptionalHeader.SectionAlignment = 0x00001000;
+	nt.OptionalHeader.FileAlignment = 0x00000200;
+	nt.OptionalHeader.MajorOperatingSystemVersion = 0x0006;
+	nt.OptionalHeader.MinorOperatingSystemVersion = 0x0000;
+	nt.OptionalHeader.MajorImageVersion = 0x0000;
+	nt.OptionalHeader.MinorImageVersion = 0x0000;
+	nt.OptionalHeader.MajorSubsystemVersion = 0x0006;
+	nt.OptionalHeader.MinorSubsystemVersion = 0x0000;
+	nt.OptionalHeader.Win32VersionValue = 0x00000000;
+	nt.OptionalHeader.SizeOfImage = 0x00400000;
+	nt.OptionalHeader.SizeOfHeaders = 0x00000400;
+	nt.OptionalHeader.CheckSum = 0x00000000;
+	nt.OptionalHeader.Subsystem = 0x0002;
+	nt.OptionalHeader.DllCharacteristics = 0x8140;
+	nt.OptionalHeader.SizeOfStackReserve = 0x00100000;
+	nt.OptionalHeader.SizeOfStackCommit = 0x00001000;
+	nt.OptionalHeader.SizeOfHeapReserve = 0x00100000;
+	nt.OptionalHeader.SizeOfHeapCommit = 0x00001000;
+	nt.OptionalHeader.LoaderFlags = 0x00000000;
+	nt.OptionalHeader.NumberOfRvaAndSizes = 0x00000010;
+	//IMAGE_NUMBEROF_DIRECTORY_ENTRIES 
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXCEPTION].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXCEPTION].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_SECURITY].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_SECURITY].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_DEBUG].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_DEBUG].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_ARCHITECTURE].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_ARCHITECTURE].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_GLOBALPTR].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_GLOBALPTR].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES - 1].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES - 1].Size = 0;
+//  [0x00000000]	{VirtualAddress = 0x003bb890 Size = 0x0000413b }	
+//  [0x00000001]	{VirtualAddress = 0x003e85d4 Size = 0x000000a0 }
+//  [0x00000002]	{VirtualAddress = 0x003eb000 Size = 0x0000043c }
+//  [0x00000003]	{VirtualAddress = 0x00000000 Size = 0x00000000 }
+//  [0x00000004]	{VirtualAddress = 0x00000000 Size = 0x00000000 }
+//  [0x00000005]	{VirtualAddress = 0x003ec000 Size = 0x0001103c }
+//  [0x00000006]	{VirtualAddress = 0x00378330 Size = 0x00000038 }
+//  [0x00000007]	{VirtualAddress = 0x00000000 Size = 0x00000000 }
+//  [0x00000008]	{VirtualAddress = 0x00000000 Size = 0x00000000 }
+//  [0x00000009]	{VirtualAddress = 0x00000000 Size = 0x00000000 }
+//  [0x0000000a]	{VirtualAddress = 0x003a2c70 Size = 0x00000040 }
+//  [0x0000000b]	{VirtualAddress = 0x00000000 Size = 0x00000000 }
+//  [0x0000000c]	{VirtualAddress = 0x003e8000 Size = 0x000005d4 }
+//  [0x0000000d]	{VirtualAddress = 0x00000000 Size = 0x00000000 }
+//  [0x0000000e]	{VirtualAddress = 0x00000000 Size = 0x00000000 }
+//  [0x0000000f]	{VirtualAddress = 0x00000000 Size = 0x00000000 }
+
+	IMAGE_SECTION_HEADER *pSectionHeader = 
+		(IMAGE_SECTION_HEADER*)LocalAlloc(LPTR, sizeof(IMAGE_SECTION_HEADER)*nt.FileHeader.NumberOfSections);
+}
+
+#pragma runtime_checks( "", off )
+void ShellCode(){
+	// the functions we need
+	LOADLIBRARYA pLoadLibraryA = NULL;
+	GETPROCADDRESS pGetProcAddress = NULL;
+	VIRTUALALLOC pVirtualAlloc = NULL;
+	NTFLUSHINSTRUCTIONCACHE pNtFlushInstructionCache = NULL;
+#ifdef ENABLE_STOPPAGING
+	VIRTUALLOCK pVirtualLock = NULL;
+#endif
+#ifdef ENABLE_OUTPUTDEBUGSTRING
+	OUTPUTDEBUG pOutputDebug = NULL;
+#endif
+	// the kernels base address and later this images newly loaded base address
+	ULONG_PTR uiBaseAddress;
+
+	// variables for processing the kernels export table
+	ULONG_PTR uiAddressArray;
+	ULONG_PTR uiNameArray;
+	ULONG_PTR uiExportDir;
+	ULONG_PTR uiNameOrdinals;
+	DWORD dwHashValue;
+
+	// variables for loading this image
+	USHORT usCounter;
+	ULONG_PTR uiValueA;
+	ULONG_PTR uiValueB;
+	ULONG_PTR uiValueC;
+	// get the Process Enviroment Block
+#ifdef _WIN64
+	uiBaseAddress = __readgsqword(0x60);
+#else
+#ifdef WIN_ARM
+	uiBaseAddress = *(DWORD *)((BYTE *)_MoveFromCoprocessor(15, 0, 13, 0, 2) + 0x30);
+#else _WIN32
+	uiBaseAddress = __readfsdword(0x30);
+#endif
+#endif
+	uiBaseAddress = (ULONG_PTR)((_PPEB)uiBaseAddress)->pLdr;
+
+	// get the first entry of the InMemoryOrder module list
+	uiValueA = (ULONG_PTR)((PPEB_LDR_DATA)uiBaseAddress)->InMemoryOrderModuleList.Flink;
+	while (uiValueA)
+	{
+		// get pointer to current modules name (unicode string)
+		uiValueB = (ULONG_PTR)((PLDR_DATA_TABLE_ENTRY)uiValueA)->BaseDllName.pBuffer;
+		// set bCounter to the length for the loop
+		usCounter = ((PLDR_DATA_TABLE_ENTRY)uiValueA)->BaseDllName.Length;
+		// clear uiValueC which will store the hash of the module name
+		uiValueC = 0;
+
+		// compute the hash of the module name...
+		do
+		{
+			uiValueC = ror((DWORD)uiValueC);
+			// normalize to uppercase if the module name is in lowercase
+			if (*((BYTE *)uiValueB) >= 'a')
+				uiValueC += *((BYTE *)uiValueB) - 0x20;
+			else
+				uiValueC += *((BYTE *)uiValueB);
+			uiValueB++;
+		} while (--usCounter);
+
+		// compare the hash with that of kernel32.dll
+		if ((DWORD)uiValueC == KERNEL32DLL_HASH)
+		{
+			// get this modules base address
+			uiBaseAddress = (ULONG_PTR)((PLDR_DATA_TABLE_ENTRY)uiValueA)->DllBase;
+
+			// get the VA of the modules NT Header
+			uiExportDir = uiBaseAddress + ((PIMAGE_DOS_HEADER)uiBaseAddress)->e_lfanew;
+
+			// uiNameArray = the address of the modules export directory entry
+			uiNameArray = (ULONG_PTR)&((PIMAGE_NT_HEADERS)uiExportDir)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+
+			// get the VA of the export directory
+			uiExportDir = (uiBaseAddress + ((PIMAGE_DATA_DIRECTORY)uiNameArray)->VirtualAddress);
+
+			// get the VA for the array of name pointers
+			uiNameArray = (uiBaseAddress + ((PIMAGE_EXPORT_DIRECTORY)uiExportDir)->AddressOfNames);
+
+			// get the VA for the array of name ordinals
+			uiNameOrdinals = (uiBaseAddress + ((PIMAGE_EXPORT_DIRECTORY)uiExportDir)->AddressOfNameOrdinals);
+
+			usCounter = 3;
+#ifdef ENABLE_STOPPAGING
+			usCounter++;
+#endif
+#ifdef ENABLE_OUTPUTDEBUGSTRING
+			usCounter++;
+#endif
+
+			// loop while we still have imports to find
+			while (usCounter > 0)
+			{
+				// compute the hash values for this function name
+				dwHashValue = _hash((char *)(uiBaseAddress + DEREF_32(uiNameArray)));
+
+				// if we have found a function we want we get its virtual address
+				if (dwHashValue == LOADLIBRARYA_HASH
+					|| dwHashValue == GETPROCADDRESS_HASH
+					|| dwHashValue == VIRTUALALLOC_HASH
+#ifdef ENABLE_STOPPAGING
+					|| dwHashValue == VIRTUALLOCK_HASH
+#endif
+#ifdef ENABLE_OUTPUTDEBUGSTRING
+					|| dwHashValue == OUTPUTDEBUG_HASH
+#endif
+					)
+				{
+					// get the VA for the array of addresses
+					uiAddressArray = (uiBaseAddress + ((PIMAGE_EXPORT_DIRECTORY)uiExportDir)->AddressOfFunctions);
+
+					// use this functions name ordinal as an index into the array of name pointers
+					uiAddressArray += (DEREF_16(uiNameOrdinals) * sizeof(DWORD));
+
+					// store this functions VA
+					if (dwHashValue == LOADLIBRARYA_HASH)
+						pLoadLibraryA = (LOADLIBRARYA)(uiBaseAddress + DEREF_32(uiAddressArray));
+					else if (dwHashValue == GETPROCADDRESS_HASH)
+						pGetProcAddress = (GETPROCADDRESS)(uiBaseAddress + DEREF_32(uiAddressArray));
+					else if (dwHashValue == VIRTUALALLOC_HASH)
+						pVirtualAlloc = (VIRTUALALLOC)(uiBaseAddress + DEREF_32(uiAddressArray));
+#ifdef ENABLE_STOPPAGING
+					else if (dwHashValue == VIRTUALLOCK_HASH)
+						pVirtualLock = (VIRTUALLOCK)(uiBaseAddress + DEREF_32(uiAddressArray));
+#endif
+#ifdef ENABLE_OUTPUTDEBUGSTRING
+					else if (dwHashValue == OUTPUTDEBUG_HASH)
+						pOutputDebug = (OUTPUTDEBUG)(uiBaseAddress + DEREF_32(uiAddressArray));
+#endif
+
+					// decrement our counter
+					usCounter--;
+				}
+
+				// get the next exported function name
+				uiNameArray += sizeof(DWORD);
+
+				// get the next exported function name ordinal
+				uiNameOrdinals += sizeof(WORD);
+			}
+		}
+		else if ((DWORD)uiValueC == NTDLLDLL_HASH)
+		{
+			// get this modules base address
+			uiBaseAddress = (ULONG_PTR)((PLDR_DATA_TABLE_ENTRY)uiValueA)->DllBase;
+
+			// get the VA of the modules NT Header
+			uiExportDir = uiBaseAddress + ((PIMAGE_DOS_HEADER)uiBaseAddress)->e_lfanew;
+
+			// uiNameArray = the address of the modules export directory entry
+			uiNameArray = (ULONG_PTR)&((PIMAGE_NT_HEADERS)uiExportDir)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+
+			// get the VA of the export directory
+			uiExportDir = (uiBaseAddress + ((PIMAGE_DATA_DIRECTORY)uiNameArray)->VirtualAddress);
+
+			// get the VA for the array of name pointers
+			uiNameArray = (uiBaseAddress + ((PIMAGE_EXPORT_DIRECTORY)uiExportDir)->AddressOfNames);
+
+			// get the VA for the array of name ordinals
+			uiNameOrdinals = (uiBaseAddress + ((PIMAGE_EXPORT_DIRECTORY)uiExportDir)->AddressOfNameOrdinals);
+
+			usCounter = 1;
+
+			// loop while we still have imports to find
+			while (usCounter > 0)
+			{
+				// compute the hash values for this function name
+				dwHashValue = _hash((char *)(uiBaseAddress + DEREF_32(uiNameArray)));
+
+				// if we have found a function we want we get its virtual address
+				if (dwHashValue == NTFLUSHINSTRUCTIONCACHE_HASH)
+				{
+					// get the VA for the array of addresses
+					uiAddressArray = (uiBaseAddress + ((PIMAGE_EXPORT_DIRECTORY)uiExportDir)->AddressOfFunctions);
+
+					// use this functions name ordinal as an index into the array of name pointers
+					uiAddressArray += (DEREF_16(uiNameOrdinals) * sizeof(DWORD));
+
+					// store this functions VA
+					if (dwHashValue == NTFLUSHINSTRUCTIONCACHE_HASH)
+						pNtFlushInstructionCache = (NTFLUSHINSTRUCTIONCACHE)(uiBaseAddress + DEREF_32(uiAddressArray));
+
+					// decrement our counter
+					usCounter--;
+				}
+
+				// get the next exported function name
+				uiNameArray += sizeof(DWORD);
+
+				// get the next exported function name ordinal
+				uiNameOrdinals += sizeof(WORD);
+			}
+		}
+
+		// we stop searching when we have found everything we need.
+		if (pLoadLibraryA
+			&& pGetProcAddress
+			&& pVirtualAlloc
+#ifdef ENABLE_STOPPAGING
+			&& pVirtualLock
+#endif
+			&& pNtFlushInstructionCache
+#ifdef ENABLE_OUTPUTDEBUGSTRING
+			&& pOutputDebug
+#endif
+			)
+			break;
+
+		// get the next entry
+		uiValueA = DEREF(uiValueA);
+	}
+	char szUser32[16] = { 'u', 's', 'e', 'r', '3', '2', 0 };
+	HMODULE hMod = pLoadLibraryA(szUser32);
+	int(WINAPI *pMessageBoxA)(HWND, LPCSTR, LPCSTR, UINT);
+	char szMessageBox[32] = { 'M', 'e', 's', 's', 'a', 'g', 'e', 'B', 'o', 'x', 'A', 0 };
+	pMessageBoxA = (int(WINAPI *)(HWND, LPCSTR, LPCSTR, UINT))pGetProcAddress(hMod, szMessageBox);
+	char szText[4] = { 'o', 'k', 0 };
+	char szTitle[8] = { 't', 'e', 's', 't', 0 };
+	pMessageBoxA(NULL, szText, szTitle, MB_OK);
+}
+_declspec(dllexport) int g_for_not_optimize_some_function = 0;
+void ShellCode_end(){
+	g_for_not_optimize_some_function++;
+}
+#pragma runtime_checks( "", restore ) 
+
+void PeTool::Test6()
+{
+	IMAGE_DOS_HEADER dos;
+	memset(&dos, 0, sizeof(IMAGE_DOS_HEADER));
+	dos.e_magic = IMAGE_DOS_SIGNATURE;
+	dos.e_lfanew = sizeof(IMAGE_DOS_HEADER);
+	IMAGE_NT_HEADERS32 nt;
+	memset(&nt, 0, sizeof(IMAGE_NT_HEADERS32));
+	nt.Signature = IMAGE_NT_SIGNATURE;
+	nt.FileHeader.Machine = 0x014c;
+	nt.FileHeader.NumberOfSections = 0x0001;
+	nt.FileHeader.TimeDateStamp = 0x57818ce7;
+	nt.FileHeader.SizeOfOptionalHeader = 0x00e0;
+	nt.FileHeader.Characteristics = 0x0102;
+	// Standard fields.
+	nt.OptionalHeader.Magic = 0x010b;
+	nt.OptionalHeader.MajorLinkerVersion = 0x0c;
+	nt.OptionalHeader.MinorLinkerVersion = 0x00;
+	nt.OptionalHeader.SizeOfCode = 0x00257e00;
+	nt.OptionalHeader.SizeOfInitializedData = 0x00086800;
+	nt.OptionalHeader.SizeOfUninitializedData = 0x00000000;
+	nt.OptionalHeader.AddressOfEntryPoint = 0x0011f195;
+	nt.OptionalHeader.BaseOfCode = 0x00001000;
+	nt.OptionalHeader.BaseOfData = 0x00001000;
+	// NT additional fields.
+	nt.OptionalHeader.ImageBase = 0x00850000;
+	nt.OptionalHeader.SectionAlignment = 0x00001000;
+	nt.OptionalHeader.FileAlignment = 0x00000200;
+	nt.OptionalHeader.MajorOperatingSystemVersion = 0x0006;
+	nt.OptionalHeader.MinorOperatingSystemVersion = 0x0000;
+	nt.OptionalHeader.MajorImageVersion = 0x0000;
+	nt.OptionalHeader.MinorImageVersion = 0x0000;
+	nt.OptionalHeader.MajorSubsystemVersion = 0x0006;
+	nt.OptionalHeader.MinorSubsystemVersion = 0x0000;
+	nt.OptionalHeader.Win32VersionValue = 0x00000000;
+	nt.OptionalHeader.SizeOfImage = 0x00400000;
+	nt.OptionalHeader.SizeOfHeaders = 0x00000400;
+	nt.OptionalHeader.CheckSum = 0x00000000;
+	nt.OptionalHeader.Subsystem = 0x0002;
+	nt.OptionalHeader.DllCharacteristics = 0x8140;
+	nt.OptionalHeader.SizeOfStackReserve = 0x00100000;
+	nt.OptionalHeader.SizeOfStackCommit = 0x00001000;
+	nt.OptionalHeader.SizeOfHeapReserve = 0x00100000;
+	nt.OptionalHeader.SizeOfHeapCommit = 0x00001000;
+	nt.OptionalHeader.LoaderFlags = 0x00000000;
+	nt.OptionalHeader.NumberOfRvaAndSizes = 0x00000010;
+	//IMAGE_NUMBEROF_DIRECTORY_ENTRIES 
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXCEPTION].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXCEPTION].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_SECURITY].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_SECURITY].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_DEBUG].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_DEBUG].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_ARCHITECTURE].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_ARCHITECTURE].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_GLOBALPTR].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_GLOBALPTR].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES - 1].VirtualAddress = 0;
+	nt.OptionalHeader.DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES - 1].Size = 0;
+
+	IMAGE_SECTION_HEADER sectionHeader;
+	memset(&sectionHeader, 0, sizeof(IMAGE_SECTION_HEADER));
+	strcpy_s((char*)&sectionHeader.Name, IMAGE_SIZEOF_SHORT_NAME, ".text");
+	sectionHeader.Misc.VirtualSize = 512;
+	sectionHeader.VirtualAddress = 0x1000;
+	sectionHeader.SizeOfRawData = 0x200;
+	sectionHeader.PointerToRawData = 0x200;
+	sectionHeader.Characteristics = 0x60000020;
+
+
+	char* pshellEntry = 0;
+	char* pshellEntry_end = 0;
+	pshellEntry = (char*)SkipJumps((PBYTE)ShellCode);
+	pshellEntry_end = (char*)SkipJumps((PBYTE)ShellCode_end);
+
+	DWORD dwCodeSize = pshellEntry_end - pshellEntry;
+	DWORD dwCodeAlignSize = 0x200*(dwCodeSize / 0x200 + (dwCodeSize % 0x200 ? 1 : 0));
+	return ;
 }

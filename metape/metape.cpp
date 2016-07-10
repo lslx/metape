@@ -34,7 +34,9 @@ int _tmain(int argc, _TCHAR* argv[])
 // 	pe.Test();
 // 	pe.Test2();
 // 	pe.Test3();
-	pe.Test4();
+// 	pe.Test4();
+//	pe.Test5();
+	pe.Test6();
 	MessageBoxA(0, "ssssssssss", "", MB_OK);
 	return 0;
 
